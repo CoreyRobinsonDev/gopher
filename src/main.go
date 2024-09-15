@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -12,17 +11,22 @@ import (
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		handleErr(errors.New("no arguments"))
+		handleErr(&commands.CmdError {
+			Type: "",
+			Msg: "no arguments",
+		})
 	}
 
 	err := commands.RunCmd(args[0], args...)
 	handleErr(err)
 }
 
-func handleErr(err error) {
+func handleErr(err *commands.CmdError) {
 	if err == nil { return }
 	fmt.Fprintln(os.Stderr, "error:", err.Error())
-	fmt.Fprintln(os.Stderr, "\nrun 'gopher help' for usage")
+	if err.Type == "new" {
+		fmt.Fprintln(os.Stderr, "\nrun 'gopher help' for usage")
+	}
 	os.Exit(1)
 }
 

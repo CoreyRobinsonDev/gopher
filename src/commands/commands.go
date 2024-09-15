@@ -26,8 +26,17 @@ var opsysList [][]string = [][]string {
 	{"darwin", "arm64"},
 }
 
+type CmdError struct {
+	Type string
+	Msg string
+}
+
+func (c CmdError) Error() string {
+	return c.Msg
+}
+
 // execute cmd
-func RunCmd(cmd string, a... string) error {
+func RunCmd(cmd string, a... string) *CmdError {
 	args := a[1:]
 	switch cmd {
 	case "new": return new(args[0])
@@ -37,16 +46,22 @@ func RunCmd(cmd string, a... string) error {
 	case "run": run()
 	case "help": help()
 	case "config": help()
-	default: return errors.New(fmt.Sprintf("no such command: %s", cmd))
+	default: return &CmdError {
+		Type: "",
+		Msg: fmt.Sprintf("no such command: %s", cmd),
+	}
 	}
 
 	return nil
 }
 
 // create new go module
-func new(path string) error {
+func new(path string) *CmdError {
 	if !strings.Contains(path, "/") {
-		return errors.New("go module requires repository location\nexample: gopher new github.com/user/mymodule")
+		return &CmdError {
+			Type: "new",
+			Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
+		}
 	}
 	pathArr := strings.Split(path, "/")
 	name := pathArr[len(pathArr) - 1]
@@ -79,7 +94,7 @@ func new(path string) error {
 }
 
 // build go binaries for mac, linux, and windows
-func build() error {
+func build() *CmdError {
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
 	grepARCHCmd := exec.Command("grep", "GOHOSTARCH")
@@ -110,6 +125,7 @@ func build() error {
 	
 	var wg sync.WaitGroup
 	errs := make(chan error, len(opsysList))
+	mainErr := make(chan string, 1)
 
 	for _, item := range opsysList {
 		wg.Add(1)
@@ -143,17 +159,27 @@ func build() error {
 				name, 
 			)
 			buildCmd := exec.Command("bash", "-c", buildCmdStr)
-			if err := buildCmd.Run(); err != nil {
-				errs <- errors.New(
-					fmt.Sprintf("could not build %s binary for %s architecture",
-						sysop, sysarch,
-					),
-				)
+
+			if osv == sysop && arch == sysarch {
+				o, _ := buildCmd.CombinedOutput()
+
+				if len(o) > 0 {
+					mainErr <- fmt.Sprintf("-----------------------------------------------------\n%s", string(o))
+				}
+			} else {
+				if err := buildCmd.Run(); err != nil {
+					errs <- errors.New(
+						fmt.Sprintf("could not build %s binary for %s architecture",
+							sysop, sysarch,
+						),
+					)
+				}
 			}
 		}()
 	}
 	wg.Wait()
 	close(errs)
+	close(mainErr)
 
 	var errStr string
 	for err := range errs {
@@ -161,7 +187,17 @@ func build() error {
 	}
 
 	if len(errStr) > 0 {
-		return errors.New(errStr[:len(errStr)-1])
+		if len(mainErr) > 0 {
+			return &CmdError {
+				Type: "build",
+				Msg: errStr + <-mainErr,
+			}
+		} else {
+			return &CmdError {
+				Type: "build",
+				Msg: errStr[:len(errStr)-1],
+			}
+		}
 	}
 
 	return nil
