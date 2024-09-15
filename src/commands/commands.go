@@ -63,10 +63,17 @@ func new(path string) error {
 
 	f1 := unwrap(os.Create("./src/main.go"))
 	f2 := unwrap(os.Create("./.gitignore"))
+	f3 := unwrap(os.Create("./README.md"))
 	defer f1.Close()
 	defer f2.Close()
+	defer f3.Close()
 	unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
 	unwrap(f2.WriteString("/target"))
+	dat := string(unwrap(os.ReadFile("./go.mod")))
+	dat = strings.Split(dat, "\n")[0]
+	datArr := strings.Split(dat, "/")
+	module := datArr[len(datArr) - 1]
+	unwrap(f3.WriteString(fmt.Sprintf("# %s", module)))
 
 	return nil
 }
