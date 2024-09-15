@@ -43,7 +43,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "add": add()
 	case "test": test()
 	case "build": return build()
-	case "run": run()
+	case "run": return run()
 	case "help": help()
 	case "config": help()
 	default: return &CmdError {
@@ -203,7 +203,13 @@ func build() *CmdError {
 	return nil
 }
 
-func run() {}
+func run() *CmdError {
+	runCmd := exec.Command("go", "run", "./src/main.go")
+	o, _ := runCmd.CombinedOutput()
+	fmt.Print(string(o))
+
+	return nil
+}
 func add() {}
 func test() {}
 func help() {}
