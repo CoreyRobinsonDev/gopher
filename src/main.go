@@ -11,10 +11,9 @@ import (
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		handleErr(&commands.CmdError {
-			Type: "",
-			Msg: "no arguments",
-		})
+		err := commands.RunCmd("help")
+		handleErr(err)
+		os.Exit(0)
 	}
 
 	err := commands.RunCmd(args[0], args...)

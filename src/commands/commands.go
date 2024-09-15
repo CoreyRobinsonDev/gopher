@@ -37,14 +37,24 @@ func (c CmdError) Error() string {
 
 // execute cmd
 func RunCmd(cmd string, a... string) *CmdError {
-	args := a[1:]
+	var args []string
+	if len(a) > 0 {
+		args = a[1:]
+	}
 	switch cmd {
-	case "new": return new(args[0])
+	case "new": 
+		if len(args) == 0 {
+			return &CmdError {
+				Type: "new",
+				Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
+			}
+		}
+		return new(args[0])
 	case "add": add()
 	case "test": test()
 	case "build": return build()
 	case "run": return run()
-	case "help": help()
+	case "help": return help()
 	case "config": help()
 	default: return &CmdError {
 		Type: "",
@@ -210,9 +220,18 @@ func run() *CmdError {
 
 	return nil
 }
+
+func help() *CmdError {
+	fmt.Println(`A Go module manager
+
+Usage: gopher [COMMAND] [...ARGS]
+
+See 'gopher help [COMMAND]' for more information about a specific command`)
+	return nil
+}
+
 func add() {}
 func test() {}
-func help() {}
 func config() {}
 
 func unwrap[T any](val T, err error) T {
