@@ -12,10 +12,20 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 )
 
 
 var pad string = "    "
+var opsysList [][]string = [][]string {
+	{"windows", "amd64"},
+	{"windows", "arm64"},
+	{"linux", "amd64"},
+	{"linux", "arm64"},
+	{"darwin", "amd64"},
+	{"darwin", "arm64"},
+}
+
 // execute cmd
 func RunCmd(cmd string, a... string) error {
 	args := a[1:]
@@ -77,14 +87,11 @@ func build() error {
 	grepARCHCmdIn.Write(out)
 	grepARCHCmdIn.Close()
 	grepOSCmdIn.Close()
-	opsysList := [][]string {
-		{"windows", "amd64"},
-		{"windows", "arm64"},
-		{"linux", "amd64"},
-		{"linux", "arm64"},
-		{"darwin", "amd64"},
-		{"darwin", "arm64"},
-	}
+
+	dat := string(unwrap(os.ReadFile("./go.mod")))
+	dat = strings.Split(dat, "\n")[0]
+	datArr := strings.Split(dat, "/")
+	module := datArr[len(datArr) - 1]
 	
 	OSout := string(unwrap(io.ReadAll(grepOSCmdOut)))
 	ARCHout := string(unwrap(io.ReadAll(grepARCHCmdOut)))
@@ -94,22 +101,68 @@ func build() error {
 	osv := strings.Trim(strings.Split(OSout, "=")[1], " '\n\t")
 	arch := strings.Trim(strings.Split(ARCHout, "=")[1], " '\n\t")
 	
+	var wg sync.WaitGroup
+	errs := make(chan error, len(opsysList))
+
 	for _, item := range opsysList {
-		sysop := item[0]
-		sysarch := item[1]
-		if sysop == osv && sysarch == arch { continue }
-		os.Setenv("GOOS", sysop)
-		os.Setenv("GOARCH", sysarch)
-		name := fmt.Sprintf()
-		buildCmd := exec.Command("go", "build", "-o")
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var name string
+			sysop := item[0]
+			sysarch := item[1]
+			fmt.Printf(
+				"%sBuilding %s binary for %s architecture\n", 
+				pad, sysop, sysarch,
+			)
+
+			if osv == sysop && arch == sysarch {
+				name = fmt.Sprintf(
+					"./target/%s",
+					module,
+				)
+			} else {
+				name = fmt.Sprintf(
+					"./target/%s-%s-%s",
+					module,
+					sysarch,
+					sysop,	
+				)
+			}
+			buildCmdStr := fmt.Sprintf(
+				"GOOS=%s GOARCH=%s go build -o %s ./src/main.go",
+				sysop,
+				sysarch,
+				name, 
+			)
+			buildCmd := exec.Command("bash", "-c", buildCmdStr)
+			if err := buildCmd.Run(); err != nil {
+				errs <- errors.New(
+					fmt.Sprintf("could not build %s binary for %s architecture",
+						sysop, sysarch,
+					),
+				)
+			}
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	var errStr string
+	for err := range errs {
+		errStr += err.Error() + "\n"
+	}
+
+	if len(errStr) > 0 {
+		return errors.New(errStr[:len(errStr)-1])
 	}
 
 	return nil
 }
 
+func run() {}
 func add() {}
 func test() {}
-func run() {}
 func help() {}
 func config() {}
 
