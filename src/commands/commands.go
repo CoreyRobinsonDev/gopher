@@ -88,7 +88,7 @@ func new(path string) *CmdError {
 	expect(goCmd.Run())
 	expect(gitCmd.Run())
 	expect(os.Mkdir("src", 0755))
-	expect(os.Mkdir("target", 0755))
+	expect(os.Mkdir("bin", 0755))
 
 	f1 := unwrap(os.Create("./src/main.go"))
 	f2 := unwrap(os.Create("./.gitignore"))
@@ -97,7 +97,7 @@ func new(path string) *CmdError {
 	defer f2.Close()
 	defer f3.Close()
 	unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
-	unwrap(f2.WriteString("/target"))
+	unwrap(f2.WriteString("/bin"))
 	dat := string(unwrap(os.ReadFile("./go.mod")))
 	dat = strings.Split(dat, "\n")[0]
 	datArr := strings.Split(dat, "/")
@@ -155,12 +155,12 @@ func build() *CmdError {
 
 			if osv == sysop && arch == sysarch {
 				name = fmt.Sprintf(
-					"./target/%s",
+					"./bin/%s",
 					module,
 				)
 			} else {
 				name = fmt.Sprintf(
-					"./target/%s-%s-%s",
+					"./bin/%s-%s-%s",
 					module,
 					sysarch,
 					sysop,	

@@ -2,4 +2,4 @@
 .env
 
 /vendor
-/target
+/bin
