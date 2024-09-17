@@ -54,8 +54,12 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "test": test()
 	case "build": return build()
 	case "run": return run()
-	case "help": return help()
-	case "config": help()
+	case "help": 
+		if len(args) == 0 {
+			return help("")
+		}
+		return help(args[0], args[1:]...)
+	case "config": config()
 	default: return &CmdError {
 		Type: "",
 		Msg: fmt.Sprintf("no such command: %s", cmd),
@@ -221,12 +225,57 @@ func run() *CmdError {
 	return nil
 }
 
-func help() *CmdError {
-	fmt.Println(`A Go module manager
+func help(cmd string, moreCmds ...string) *CmdError {
+	if len(cmd) > 0 {
+		switch cmd {
+		case "new": 
+			fmt.Println(`create new go module
 
-Usage: gopher [COMMAND] [...ARGS]
+example: gopher new github.com/user/mymodule`)
+		case "add": 
+		case "test": 
+		case "build": 
+			fmt.Println(`compile packages and dependencies
 
-See 'gopher help [COMMAND]' for more information about a specific command`)
+'gopher build' should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go
+
+example: gopher build`)
+		case "run": 
+			fmt.Println(`compile and run Go program
+
+'gopher run' should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go
+
+example: gopher run`)
+		case "help": 
+			if len(moreCmds) > 0 {
+				help(moreCmds[0], moreCmds[1:]...)
+			} else {
+				help("")
+			}
+		case "config": 
+		default: return &CmdError {
+			Type: "help",
+			Msg: fmt.Sprintf("no such command: %s", cmd),
+		}
+		}
+	} else {
+		fmt.Println(`A Go module manager
+
+usage: gopher [COMMAND] [...ARGS]
+
+commands:
+    add	        add dependencies to current module and install them
+    build       compile packages and dependencies
+    config      configure gopher settings
+    help        this
+    new	        create new go module
+    run	        compile and run Go program
+    test        run Go test packages
+    version     print Go version
+
+see 'gopher help [COMMAND]' for more information about a specific command`)
+	}
+
 	return nil
 }
 
