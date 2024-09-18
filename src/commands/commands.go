@@ -210,7 +210,7 @@ func build() *CmdError {
 }
 
 func run() *CmdError {
-	runCmd := exec.Command("go", "run", "./src/main.go")
+	runCmd := exec.Command("go", "run", "./src/")
 	o, _ := runCmd.CombinedOutput()
 	fmt.Print(string(o))
 
