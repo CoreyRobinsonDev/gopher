@@ -67,7 +67,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 		}
 		return add(args[0])
 	case "test": test()
-	case "build": return build()
+	case "build": return build(args...)
 	case "run": return run(args...)
 	case "help": 
 		if len(args) == 0 {
@@ -119,7 +119,8 @@ func new(path string) *CmdError {
 	return nil
 }
 
-func build() *CmdError {
+func build(args ...string) *CmdError {
+	var opsysPairs [][]string 
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
 	grepARCHCmd := exec.Command("grep", "GOHOSTARCH")
@@ -148,11 +149,18 @@ func build() *CmdError {
 	osv := strings.Trim(strings.Split(OSout, "=")[1], " '\n\t")
 	arch := strings.Trim(strings.Split(ARCHout, "=")[1], " '\n\t")
 	
+	if len(args) > 0 {
+		if args[0] == "--cross-platform" || args[0] == "-x" {
+			opsysPairs = opsysList
+		}
+	} else {
+		opsysPairs = [][]string{{osv, arch}}
+	}
 	var wg sync.WaitGroup
-	errs := make(chan error, len(opsysList))
+	errs := make(chan error, len(opsysPairs))
 	mainErr := make(chan string, 1)
 
-	for _, item := range opsysList {
+	for _, item := range opsysPairs {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -178,7 +186,7 @@ func build() *CmdError {
 				)
 			}
 			buildCmdStr := fmt.Sprintf(
-				"GOOS=%s GOARCH=%s go build -o %s ./src/main.go",
+				"GOOS=%s GOARCH=%s go build -o %s ./src/",
 				sysop,
 				sysarch,
 				name, 
