@@ -3,28 +3,26 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/CoreyRobinsonDev/gopher/src/commands"
 )
 
 
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		err := commands.RunCmd("help")
+		err := RunCmd("help")
 		handleErr(err)
 		os.Exit(0)
 	}
 
-	err := commands.RunCmd(args[0], args...)
+	err := RunCmd(args[0], args...)
 	handleErr(err)
 }
 
-func handleErr(err *commands.CmdError) {
+func handleErr(err *CmdError) {
 	if err == nil { return }
-	fmt.Fprintf(os.Stderr, "%s %s\n", commands.Bold(commands.Color("error:", commands.RED)), err.Error())
+	fmt.Fprintf(os.Stderr, "%s %s\n", Bold(Color("error:", RED)), err.Error())
 	if err.Type == "new" || err.Type == "add" {
-		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", commands.Italic("gopher", commands.Color("help", commands.BLUE)))
+		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", Italic("gopher", Color("help", BLUE)))
 	}
 	os.Exit(1)
 }
