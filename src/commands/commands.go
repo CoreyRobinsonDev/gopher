@@ -232,6 +232,9 @@ func help(cmd string, moreCmds ...string) *CmdError {
 
 example: gopher new github.com/user/mymodule`)
 		case "add": 
+			fmt.Println(`add dependencies to current module and install them
+
+example: gopher add rsc.io/quote`)
 		case "test": 
 		case "build": 
 			fmt.Println(`compile packages and dependencies
