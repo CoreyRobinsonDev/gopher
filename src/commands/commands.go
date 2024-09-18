@@ -41,11 +41,18 @@ func RunCmd(cmd string, a... string) *CmdError {
 		if len(args) == 0 {
 			return &CmdError {
 				Type: "new",
-				Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
+				Msg: "go module requires repository location\n\nexample: gopher new github.com/user/mymodule",
 			}
 		}
 		return new(args[0])
-	case "add": return add(cmd)
+	case "add": 
+		if len(args) == 0 {
+			return &CmdError {
+				Type: "add",
+				Msg: "no go module specified\n\nexample: gopher add rsc.io/quote",
+			}
+		}
+		return add(args[0])
 	case "test": test()
 	case "build": return build()
 	case "run": return run()
@@ -272,8 +279,10 @@ see 'gopher help [COMMAND]' for more information about a specific command`)
 }
 
 func add(pkg string) *CmdError {
+	getCmd := exec.Command("go", "get", pkg)
+	out, _ := getCmd.CombinedOutput()
+	fmt.Print(string(out))
 
-	fmt.Printf(pkg)
 	return nil
 }
 
