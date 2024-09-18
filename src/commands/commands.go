@@ -83,25 +83,25 @@ func new(path string) *CmdError {
 	// name := pathArr[len(pathArr) - 1]
 
 	name := path
-	unwrap(fmt.Printf("%sCreating binary `%s` module\n", pad, name))
-	expect(os.Mkdir(name, 0755))
-	expect(os.Chdir(name))
+	Unwrap(fmt.Printf("%sCreating binary `%s` module\n", pad, name))
+	Expect(os.Mkdir(name, 0755))
+	Expect(os.Chdir(name))
 	goCmd := exec.Command("go", "mod", "init", path)
 	gitCmd := exec.Command("git", "init")
-	expect(goCmd.Run())
-	expect(gitCmd.Run())
-	expect(os.Mkdir("src", 0755))
-	expect(os.Mkdir("bin", 0755))
+	Expect(goCmd.Run())
+	Expect(gitCmd.Run())
+	Expect(os.Mkdir("src", 0755))
+	Expect(os.Mkdir("bin", 0755))
 
-	f1 := unwrap(os.Create("./src/main.go"))
-	f2 := unwrap(os.Create("./.gitignore"))
-	f3 := unwrap(os.Create("./README.md"))
+	f1 := Unwrap(os.Create("./src/main.go"))
+	f2 := Unwrap(os.Create("./.gitignore"))
+	f3 := Unwrap(os.Create("./README.md"))
 	defer f1.Close()
 	defer f2.Close()
 	defer f3.Close()
-	unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
-	unwrap(f2.WriteString("/bin"))
-	unwrap(f3.WriteString(fmt.Sprintf("# %s", name)))
+	Unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
+	Unwrap(f2.WriteString("/bin"))
+	Unwrap(f3.WriteString(fmt.Sprintf("# %s", name)))
 
 	return nil
 }
@@ -111,25 +111,25 @@ func build() *CmdError {
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
 	grepARCHCmd := exec.Command("grep", "GOHOSTARCH")
-	out := unwrap(envCmd.Output())
-	grepOSCmdIn := unwrap(grepOSCmd.StdinPipe())
-	grepARCHCmdIn := unwrap(grepARCHCmd.StdinPipe())
-	grepOSCmdOut := unwrap(grepOSCmd.StdoutPipe())
-	grepARCHCmdOut := unwrap(grepARCHCmd.StdoutPipe())
-	expect(grepOSCmd.Start())
-	expect(grepARCHCmd.Start())
+	out := Unwrap(envCmd.Output())
+	grepOSCmdIn := Unwrap(grepOSCmd.StdinPipe())
+	grepARCHCmdIn := Unwrap(grepARCHCmd.StdinPipe())
+	grepOSCmdOut := Unwrap(grepOSCmd.StdoutPipe())
+	grepARCHCmdOut := Unwrap(grepARCHCmd.StdoutPipe())
+	Expect(grepOSCmd.Start())
+	Expect(grepARCHCmd.Start())
 	grepOSCmdIn.Write(out)
 	grepARCHCmdIn.Write(out)
 	grepARCHCmdIn.Close()
 	grepOSCmdIn.Close()
 
-	dat := string(unwrap(os.ReadFile("./go.mod")))
+	dat := string(Unwrap(os.ReadFile("./go.mod")))
 	dat = strings.Split(dat, "\n")[0]
 	datArr := strings.Split(dat, "/")
 	module := datArr[len(datArr) - 1]
 	
-	OSout := string(unwrap(io.ReadAll(grepOSCmdOut)))
-	ARCHout := string(unwrap(io.ReadAll(grepARCHCmdOut)))
+	OSout := string(Unwrap(io.ReadAll(grepOSCmdOut)))
+	ARCHout := string(Unwrap(io.ReadAll(grepARCHCmdOut)))
 	grepARCHCmd.Wait()
 	grepOSCmd.Wait()
 
@@ -289,24 +289,3 @@ func add(pkg string) *CmdError {
 func test() {}
 func config() {}
 
-func unwrap[T any](val T, err error) T {
-	if err != nil { panic(err) }
-
-	return val
-}
-
-func unwrapOr[T any](val T, err error) func(T) T {
-	if err != nil {
-		return func(d T) T {
-			return d
-		}
-	} else {
-		return func(_ T) T {
-			return val
-		}
-	}
-}
-
-func expect(err error) {
-	if err != nil { panic(err) }
-}
