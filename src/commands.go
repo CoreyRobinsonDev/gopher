@@ -113,7 +113,7 @@ func new(path string) *CmdError {
 	defer f2.Close()
 	defer f3.Close()
 	Unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
-	Unwrap(f2.WriteString("/bin"))
+	Unwrap(f2.WriteString("bin/\n*.exe\n*.exe~\n*.dll\n*.so\n*.dylib\n\n*.test\n*.out\nvendor/\n\ngo.work\ngo.work.sum\n\n.env"))
 	Unwrap(f3.WriteString(fmt.Sprintf("# %s", name)))
 
 	return nil
