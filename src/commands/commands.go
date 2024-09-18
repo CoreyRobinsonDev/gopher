@@ -30,7 +30,6 @@ func (c CmdError) Error() string {
 	return c.Msg
 }
 
-// execute cmd
 func RunCmd(cmd string, a... string) *CmdError {
 	var args []string
 	if len(a) > 0 {
@@ -41,7 +40,14 @@ func RunCmd(cmd string, a... string) *CmdError {
 		if len(args) == 0 {
 			return &CmdError {
 				Type: "new",
-				Msg: "go module requires repository location\n\nexample: gopher new github.com/user/mymodule",
+				Msg: fmt.Sprintf("go module requires repository location\n\n%s %s",
+					Bold(Color("example:", PURPLE)),
+					Italic(
+						"gopher",
+						Color("new", BLUE),
+						"github.com/user/mymodule",
+					),
+				),
 			}
 		}
 		return new(args[0])
@@ -49,7 +55,14 @@ func RunCmd(cmd string, a... string) *CmdError {
 		if len(args) == 0 {
 			return &CmdError {
 				Type: "add",
-				Msg: "no go module specified\n\nexample: gopher add rsc.io/quote",
+				Msg: fmt.Sprintf("no go module specified\n\n%s %s",
+					Bold(Color("example:", PURPLE)),
+					Italic(
+						"gopher",
+						Color("add", BLUE),
+						"rsc.io/quote",
+					),
+				),
 			}
 		}
 		return add(args[0])
@@ -62,6 +75,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 		}
 		return help(args[0], args[1:]...)
 	case "config": config()
+	case "version": version()
 	default: return &CmdError {
 		Type: "",
 		Msg: fmt.Sprintf("no such command: %s", cmd),
@@ -71,7 +85,6 @@ func RunCmd(cmd string, a... string) *CmdError {
 	return nil
 }
 
-// create new go module
 func new(path string) *CmdError {
 	// if !strings.Contains(path, "/") {
 	// 	return &CmdError {
@@ -106,7 +119,6 @@ func new(path string) *CmdError {
 	return nil
 }
 
-// build go binaries for mac, linux, and windows
 func build() *CmdError {
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
@@ -229,26 +241,44 @@ func help(cmd string, moreCmds ...string) *CmdError {
 	if len(cmd) > 0 {
 		switch cmd {
 		case "new": 
-			fmt.Println(`create new go module
-
-example: gopher new github.com/user/mymodule`)
+			fmt.Printf("create new go module\n\n%s %s\n",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("new", BLUE),
+					"github.com/user/mymodule",
+				),
+			)
 		case "add": 
-			fmt.Println(`add dependencies to current module and install them
-
-example: gopher add rsc.io/quote`)
+			fmt.Printf("add dependencies to current module and install them\n\n%s %s\n",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("add", BLUE),
+					"rsc.io/quote",
+				),
+			)
 		case "test": 
 		case "build": 
-			fmt.Println(`compile packages and dependencies
-
-'gopher build' should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go
-
-example: gopher build`)
+			fmt.Printf("compile packages and dependencies\n\n%s %s\n\n%s %s\n",
+				Bold("gopher build"),
+				"should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("build", BLUE),
+				),
+			)
 		case "run": 
-			fmt.Println(`compile and run Go program
-
-'gopher run' should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go
-
-example: gopher run`)
+			fmt.Printf("compile and run Go program\n\n%s %s\n\n%s %s\n",
+				Bold("gopher run"),
+				"should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("run", BLUE),
+				),
+			)
 		case "help": 
 			if len(moreCmds) > 0 {
 				help(moreCmds[0], moreCmds[1:]...)
@@ -262,21 +292,28 @@ example: gopher run`)
 		}
 		}
 	} else {
-		fmt.Println(`A Go module manager
-
-usage: gopher [COMMAND] [...ARGS]
-
-commands:
-    add	        add dependencies to current module and install them
-    build       compile packages and dependencies
-    config      configure gopher settings
-    help        this
-    new	        create new go module
-    run	        compile and run Go program
-    test        run Go test packages
-    version     print Go version
-
-see 'gopher help [COMMAND]' for more information about a specific command`)
+		fmt.Printf("A Go module manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command",
+			Bold(Color("usage:", PURPLE)),
+			Italic(
+				"gopher",
+				Color("[COMMAND]", BLUE),
+				Color("[...ARGS]", CYAN),
+			),
+			Bold(Color("commands:", PURPLE)),
+			pad + "add" + "\t\t" + "add dependencies to current module and install them",
+			pad + "build" + "\t" + "compile packages and dependencies",
+			pad + "config" + "\t" + "configure gopher settings",
+			pad + "help" + "\t" + "this",
+			pad + "new" + "\t\t" + "create new go module",
+			pad + "run" + "\t\t" + "compile and run Go program",
+			pad + "test" + "\t" + "run Go test packages",
+			pad + "version" + "\t" + "print Go version",
+			Italic(
+				"gopher",
+				Color("help", BLUE),
+				Color("[COMMANDS]", CYAN),
+			),
+		)
 	}
 
 	return nil
@@ -292,4 +329,5 @@ func add(pkg string) *CmdError {
 
 func test() {}
 func config() {}
+func version() {}
 

@@ -22,9 +22,9 @@ func main() {
 
 func handleErr(err *commands.CmdError) {
 	if err == nil { return }
-	fmt.Fprintln(os.Stderr, "error:", err.Error())
-	if err.Type == "new" {
-		fmt.Fprintln(os.Stderr, "\nrun 'gopher help' for usage")
+	fmt.Fprintf(os.Stderr, "%s %s\n", commands.Bold(commands.Color("error:", commands.RED)), err.Error())
+	if err.Type == "new" || err.Type == "add" {
+		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", commands.Italic("gopher", commands.Color("help", commands.BLUE)))
 	}
 	os.Exit(1)
 }
