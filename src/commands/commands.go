@@ -55,7 +55,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 		return add(args[0])
 	case "test": test()
 	case "build": return build()
-	case "run": return run()
+	case "run": return run(args...)
 	case "help": 
 		if len(args) == 0 {
 			return help("")
@@ -216,10 +216,11 @@ func build() *CmdError {
 	return nil
 }
 
-func run() *CmdError {
-	runCmd := exec.Command("go", "run", "./src/")
-	o, _ := runCmd.CombinedOutput()
-	fmt.Print(string(o))
+func run(args ...string) *CmdError {
+	args = append([]string {"run", "./src/"}, args...)
+	runCmd := exec.Command("go", args...)
+	out, _ := runCmd.CombinedOutput()
+	fmt.Print(string(out))
 
 	return nil
 }
