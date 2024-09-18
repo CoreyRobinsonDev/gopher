@@ -1,8 +1,3 @@
-/*
-	Main commands to be ran by gopher
-
-new | add | test | build | run | help | config
-*/
 package commands
 
 import (
@@ -50,7 +45,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 			}
 		}
 		return new(args[0])
-	case "add": add()
+	case "add": return add(cmd)
 	case "test": test()
 	case "build": return build()
 	case "run": return run()
@@ -71,15 +66,16 @@ func RunCmd(cmd string, a... string) *CmdError {
 
 // create new go module
 func new(path string) *CmdError {
-	if !strings.Contains(path, "/") {
-		return &CmdError {
-			Type: "new",
-			Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
-		}
-	}
-	pathArr := strings.Split(path, "/")
-	name := pathArr[len(pathArr) - 1]
+	// if !strings.Contains(path, "/") {
+	// 	return &CmdError {
+	// 		Type: "new",
+	// 		Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
+	// 	}
+	// }
+	// pathArr := strings.Split(path, "/")
+	// name := pathArr[len(pathArr) - 1]
 
+	name := path
 	unwrap(fmt.Printf("%sCreating binary `%s` module\n", pad, name))
 	expect(os.Mkdir(name, 0755))
 	expect(os.Chdir(name))
@@ -98,11 +94,7 @@ func new(path string) *CmdError {
 	defer f3.Close()
 	unwrap(f1.WriteString("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}"))
 	unwrap(f2.WriteString("/bin"))
-	dat := string(unwrap(os.ReadFile("./go.mod")))
-	dat = strings.Split(dat, "\n")[0]
-	datArr := strings.Split(dat, "/")
-	module := datArr[len(datArr) - 1]
-	unwrap(f3.WriteString(fmt.Sprintf("# %s", module)))
+	unwrap(f3.WriteString(fmt.Sprintf("# %s", name)))
 
 	return nil
 }
@@ -279,7 +271,12 @@ see 'gopher help [COMMAND]' for more information about a specific command`)
 	return nil
 }
 
-func add() {}
+func add(pkg string) *CmdError {
+
+	fmt.Printf(pkg)
+	return nil
+}
+
 func test() {}
 func config() {}
 
