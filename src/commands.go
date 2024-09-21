@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 
@@ -96,7 +100,7 @@ func new(path string) *CmdError {
 	// name := pathArr[len(pathArr) - 1]
 
 	name := path
-	Unwrap(fmt.Printf("%sCreating binary `%s` module\n", pad, name))
+	Unwrap(fmt.Printf("%sCreated binary `%s` module\n", pad, name))
 	Expect(os.Mkdir(name, 0755))
 	Expect(os.Chdir(name))
 	goCmd := exec.Command("go", "mod", "init", path)
@@ -328,14 +332,134 @@ func help(cmd string, moreCmds ...string) *CmdError {
 }
 
 func add(pkg string) *CmdError {
-	getCmd := exec.Command("go", "get", pkg)
-	out, _ := getCmd.CombinedOutput()
-	fmt.Print(string(out))
+	if strings.Contains(pkg, "/") {
+		getCmd := exec.Command("go", "get", pkg)
+		out, _ := getCmd.CombinedOutput()
+		fmt.Print(string(out))
+	} else {
+		pkgQueryLimit := 5 + 1
+		url := fmt.Sprintf(
+			"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
+			pkgQueryLimit,
+			pkg,
+		)
+		res := Unwrap(http.Get(url))
+		dat := string(Unwrap(io.ReadAll(res.Body)))
+		defer res.Body.Close()
+		lines := strings.Split(dat, "\n")
+		pkgHTML := [][]string{}
+		pkgNames := []string{}
+		lineNums := []int{}
+
+		for i, line := range lines {
+			if strings.Contains(line, "\"SearchSnippet\"") {
+				lineNums = append(lineNums, i)
+			}
+		}
+
+		for i := range lineNums {
+			if i == len(lineNums) - 1 {break}
+			pkgHTML = append(pkgHTML, lines[lineNums[i]:lineNums[i+1]])
+		}
+
+		for i := len(pkgHTML)-1; i >= 0; i-- {
+			var pkgName string
+			var pkgMeta string
+			var pkgDesc string
+			for ii, pkgLine := range pkgHTML[i] {
+				pkgLine = strings.Trim(pkgLine, " \t\n")
+				if strings.Contains(pkgLine, "SearchSnippet-header-path") {
+					write := false
+					for _, ch := range pkgLine {
+						if ch == '(' && write == false { 
+							write = true; continue 
+						} else if ch == ')' && write == true { write = false }
+						if write {
+							pkgName += string(ch)
+						}
+					}
+				} else if strings.Contains(pkgLine, "published on") {
+					write := false
+					for _, ch := range pkgLine {
+						if ch == '>' && write == false { 
+							write = true; continue 
+						} else if ch == '<' && write == true { write = false }
+						if write {
+							pkgMeta += string(ch)
+						}
+					}
+				} else if strings.Contains(pkgLine, "SearchSnippet-synopsis") {
+					pkgDesc = strings.Trim(pkgHTML[i][ii+1], " \t\n")
+				}
+			}
+			pkgMetaArr := strings.Split(pkgMeta, " ")
+			version := pkgMetaArr[0]
+			fmt.Printf(
+				"%s %s %s %s\n", 
+				Color(strconv.Itoa(i+1), BLUE),
+				Bold(pkgName),
+				Color(version, CYAN),
+				Bold("("+strings.Join(pkgMetaArr[1:], " ")+")"),
+			)
+			pkgDesc = strings.ReplaceAll(pkgDesc, "&#34;", "\"")
+			pkgDesc = strings.ReplaceAll(pkgDesc, "&#39;", "'")
+			if len(pkgDesc) > 0 {
+				fmt.Printf("%s%s\n", pad, pkgDesc)
+			}
+			pkgNames = append([]string{pkgName}, pkgNames...)
+		}
+		fmt.Printf(
+			"%s Packages to install (eg: 1 2 3)\n",
+			Bold(Color("==>", YELLOW)),
+		)
+		fmt.Printf(
+			"%s",
+			Bold(Color("==> ", YELLOW)),
+		)
+		reader := bufio.NewReader(os.Stdin)
+		in := Unwrap(reader.ReadString('\n'))
+		in = in[:len(in)-1]
+		opt, err := strconv.Atoi(in)
+		if err != nil || opt >= pkgQueryLimit {
+			return &CmdError {
+				Type: "add",
+				Msg: fmt.Sprintf("index '%s' not found\n\nenter a numeric value from 1-%d",
+					in,
+					pkgQueryLimit-1,
+				),
+			}
+		}
+
+		output := make(chan string)
+		go func() {
+			getCmd := exec.Command("go", "get", pkgNames[opt-1])
+			o, _ := getCmd.CombinedOutput()
+			output <- string(o)
+		}()
+		count := 0
+		loop: for {
+			count++
+			fmt.Printf(
+				"downloading %s %s\r",
+				Bold(pkgNames[opt-1]),
+				Color("("+strconv.Itoa(count)+"s)", BLUE),
+			)
+			time.Sleep(1 * time.Second)
+			select {
+			case out := <-output:
+				fmt.Printf("\n%s",out)
+				close(output)
+				break loop
+			default:
+			}
+		}
+	}
 
 	return nil
 }
 
 func test() {}
+func tidy() {}
 func config() {}
 func version() {}
 
