@@ -337,7 +337,7 @@ func add(pkg string) *CmdError {
 		out, _ := getCmd.CombinedOutput()
 		fmt.Print(string(out))
 	} else {
-		pkgQueryLimit := 5 + 1
+		pkgQueryLimit := 10 + 1
 		url := fmt.Sprintf(
 			"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
 			pkgQueryLimit,
