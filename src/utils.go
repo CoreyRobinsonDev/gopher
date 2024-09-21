@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -50,7 +51,7 @@ func Bold(text ...string) string {
 }
 
 func Unwrap[T any](val T, err error) T {
-	if err != nil { panic(err) }
+	if err != nil { handleErr(&CmdError {CmdInvalid, err.Error()}) }
 
 	return val
 }
@@ -68,6 +69,15 @@ func UnwrapOr[T any](val T, err error) func(T) T {
 }
 
 func Expect(err error) {
-	if err != nil { panic(err) }
+	if err != nil { handleErr(&CmdError {CmdInvalid, err.Error()}) }
+}
+
+func handleErr(err *CmdError) {
+	if err == nil { return }
+	fmt.Fprintf(os.Stderr, "%s %s\n", Bold(Color("error:", RED)), err.Msg)
+	if err.Type == CmdNew || err.Type == CmdAdd {
+		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", Italic("gopher", Color("help", BLUE)))
+	}
+	os.Exit(1)
 }
 

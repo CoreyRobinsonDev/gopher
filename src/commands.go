@@ -25,8 +25,36 @@ var opsysList [][]string = [][]string {
 	{"darwin", "arm64"},
 }
 
+type Command int
+const (
+	CmdNew = iota
+	CmdAdd
+	CmdHelp
+	CmdTidy
+	CmdBuild
+	CmdConfig
+	CmdRun
+	CmdVersion
+	CmdInvalid
+)
+
+var commandName = map[Command]string {
+	CmdNew: "new",
+	CmdAdd: "add",
+	CmdHelp: "help",
+	CmdTidy: "tidy",
+	CmdBuild: "build",
+	CmdConfig: "config",
+	CmdRun: "run",
+	CmdVersion: "version",
+	CmdInvalid: "invalid",
+}
+func (c Command) String() string {
+	return commandName[c]
+}
+
 type CmdError struct {
-	Type string
+	Type Command
 	Msg string
 }
 
@@ -43,7 +71,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "new": 
 		if len(args) == 0 {
 			return &CmdError {
-				Type: "new",
+				Type: CmdNew,
 				Msg: fmt.Sprintf("go module requires repository location\n\n%s %s",
 					Bold(Color("example:", PURPLE)),
 					Italic(
@@ -58,7 +86,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "add": 
 		if len(args) == 0 {
 			return &CmdError {
-				Type: "add",
+				Type: CmdAdd,
 				Msg: fmt.Sprintf("no go module specified\n\n%s %s",
 					Bold(Color("example:", PURPLE)),
 					Italic(
@@ -81,7 +109,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "config": config()
 	case "version": version()
 	default: return &CmdError {
-		Type: "",
+		Type: CmdInvalid,
 		Msg: fmt.Sprintf("no such command: %s", cmd),
 	}
 	}
@@ -226,12 +254,12 @@ func build(args ...string) *CmdError {
 	if len(errStr) > 0 {
 		if len(mainErr) > 0 {
 			return &CmdError {
-				Type: "build",
+				Type: CmdBuild,
 				Msg: errStr + <-mainErr,
 			}
 		} else {
 			return &CmdError {
-				Type: "build",
+				Type: CmdBuild,
 				Msg: errStr[:len(errStr)-1],
 			}
 		}
@@ -299,7 +327,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 			}
 		case "config": 
 		default: return &CmdError {
-			Type: "help",
+			Type: CmdHelp,
 			Msg: fmt.Sprintf("no such command: %s", cmd),
 		}
 		}
@@ -422,7 +450,7 @@ func add(pkg string) *CmdError {
 		opt, err := strconv.Atoi(in)
 		if err != nil || opt >= pkgQueryLimit {
 			return &CmdError {
-				Type: "add",
+				Type: CmdAdd,
 				Msg: fmt.Sprintf("index '%s' not found\n\nenter a numeric value from 1-%d",
 					in,
 					pkgQueryLimit-1,
