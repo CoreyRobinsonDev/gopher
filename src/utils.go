@@ -75,7 +75,7 @@ func Expect(err error) {
 func handleErr(err *CmdError) {
 	if err == nil { return }
 	fmt.Fprintf(os.Stderr, "%s %s\n", Bold(Color("error:", RED)), err.Msg)
-	if err.Type == CmdNew || err.Type == CmdAdd {
+	if err.Type != CmdRun && err.Type != CmdBuild {
 		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", Italic("gopher", Color("help", BLUE)))
 	}
 	os.Exit(1)

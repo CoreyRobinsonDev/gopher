@@ -128,7 +128,7 @@ func new(path string) *CmdError {
 	// name := pathArr[len(pathArr) - 1]
 
 	name := path
-	Unwrap(fmt.Printf("%sCreated binary `%s` module\n", pad, name))
+	Unwrap(fmt.Printf("%sCreated binary '%s' module\n", pad, name))
 	Expect(os.Mkdir(name, 0755))
 	Expect(os.Chdir(name))
 	goCmd := exec.Command("go", "mod", "init", path)
@@ -153,6 +153,7 @@ func new(path string) *CmdError {
 
 func build(args ...string) *CmdError {
 	var opsysPairs [][]string 
+	var announceBuild bool
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
 	grepARCHCmd := exec.Command("grep", "GOHOSTARCH")
@@ -170,7 +171,12 @@ func build(args ...string) *CmdError {
 
 	dat := string(Unwrap(os.ReadFile("./go.mod")))
 	dat = strings.Split(dat, "\n")[0]
-	datArr := strings.Split(dat, "/")
+	var datArr []string
+	if strings.Contains(dat, "/") {
+		datArr = strings.Split(dat, "/")
+	} else {
+		datArr = strings.Split(dat, " ")
+	}
 	module := datArr[len(datArr) - 1]
 	
 	OSout := string(Unwrap(io.ReadAll(grepOSCmdOut)))
@@ -184,6 +190,7 @@ func build(args ...string) *CmdError {
 	if len(args) > 0 {
 		if args[0] == "--cross-platform" || args[0] == "-x" {
 			opsysPairs = opsysList
+			announceBuild = true
 		}
 	} else {
 		opsysPairs = [][]string{{osv, arch}}
@@ -197,18 +204,22 @@ func build(args ...string) *CmdError {
 		go func() {
 			defer wg.Done()
 			var name string
+			var buildCmd *exec.Cmd
 			sysop := item[0]
 			sysarch := item[1]
-			fmt.Printf(
-				"%sBuilding %s binary for %s architecture\n", 
-				pad, sysop, sysarch,
-			)
+			if announceBuild {
+				fmt.Printf(
+					"%sBuilding %s binary for %s architecture\n", 
+					pad, sysop, sysarch,
+				)
+			}
 
 			if osv == sysop && arch == sysarch {
 				name = fmt.Sprintf(
 					"./bin/%s",
 					module,
 				)
+				buildCmd = exec.Command("go", "build", "-o", name, "./src/")
 			} else {
 				name = fmt.Sprintf(
 					"./bin/%s-%s-%s",
@@ -216,20 +227,20 @@ func build(args ...string) *CmdError {
 					sysarch,
 					sysop,	
 				)
+				buildCmdStr := fmt.Sprintf(
+					"GOOS=%s GOARCH=%s go build -o %s ./src/",
+					sysop,
+					sysarch,
+					name, 
+				)
+				buildCmd = exec.Command("bash", "-c", buildCmdStr)
 			}
-			buildCmdStr := fmt.Sprintf(
-				"GOOS=%s GOARCH=%s go build -o %s ./src/",
-				sysop,
-				sysarch,
-				name, 
-			)
-			buildCmd := exec.Command("bash", "-c", buildCmdStr)
 
 			if osv == sysop && arch == sysarch {
 				o, _ := buildCmd.CombinedOutput()
 
-				if len(o) > 0 {
-					mainErr <- fmt.Sprintf("-----------------------------------------------------\n%s", string(o))
+				if len(o) > 1 {
+					mainErr <- string(o)
 				}
 			} else {
 				if err := buildCmd.Run(); err != nil {
@@ -251,12 +262,9 @@ func build(args ...string) *CmdError {
 		errStr += err.Error() + "\n"
 	}
 
-	if len(errStr) > 0 {
+	if len(errStr) > 0 || len(mainErr) > 0 {
 		if len(mainErr) > 0 {
-			return &CmdError {
-				Type: CmdBuild,
-				Msg: errStr + <-mainErr,
-			}
+			fmt.Print(<-mainErr)
 		} else {
 			return &CmdError {
 				Type: CmdBuild,
