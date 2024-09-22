@@ -191,6 +191,8 @@ func build(args ...string) *CmdError {
 		if args[0] == "--cross-platform" || args[0] == "-x" {
 			opsysPairs = opsysList
 			announceBuild = true
+		} else {
+			opsysPairs = [][]string{{osv, arch}}
 		}
 	} else {
 		opsysPairs = [][]string{{osv, arch}}
@@ -219,7 +221,12 @@ func build(args ...string) *CmdError {
 					"./bin/%s",
 					module,
 				)
-				buildCmd = exec.Command("go", "build", "-o", name, "./src/")
+				if len(args) > 0 {
+					args = append([]string{"build"}, args...)
+					buildCmd = exec.Command("go", args...)
+				} else {
+					buildCmd = exec.Command("go", "build", "-o", name, "./src/")
+				}
 			} else {
 				name = fmt.Sprintf(
 					"./bin/%s-%s-%s",
