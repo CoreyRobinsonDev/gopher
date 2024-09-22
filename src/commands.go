@@ -298,19 +298,34 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				),
 			)
 		case "add": 
-			fmt.Printf("add dependencies to current module and install them\n\n%s %s\n",
+			fmt.Printf("Add dependencies to current module and install them.\n\nWhen a full package name isn't provided %s will do a search on pkg.go.dev for matching packages. The number of results returned on this search can be adjusted with %s.\n\n%s %s\n%s %s\n",
+				Bold("gopher add"),
+				Bold("gopher config"),
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
 					Color("add", BLUE),
 					"rsc.io/quote",
 				),
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("add", BLUE),
+					"gofiber",
+				),
 			)
 		case "test": 
 		case "build": 
-			fmt.Printf("compile packages and dependencies\n\n%s %s\n\n%s %s\n",
+			fmt.Printf("compile packages and dependencies\n\n%s should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go\n\n%s %s\n\n%s\n%s\n\n%s %s\n",
 				Bold("gopher build"),
-				"should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go",
+				Bold(Color("usage:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("build", BLUE),
+					Color("[...ARGS]", CYAN),
+				),
+				Bold(Color("arguments:", PURPLE)),
+				pad + "-x,--cross-platform" + "\t\t" + "build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
@@ -318,9 +333,14 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				),
 			)
 		case "run": 
-			fmt.Printf("compile and run Go program\n\n%s %s\n\n%s %s\n",
+			fmt.Printf("compile and run Go program\n\n%s should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go\n\n%s %s\n\n%s %s\n",
 				Bold("gopher run"),
-				"should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go",
+				Bold(Color("usage:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("run", BLUE),
+					Color("[...ARGS]", CYAN),
+				),
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
@@ -340,7 +360,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 		}
 		}
 	} else {
-		fmt.Printf("A Go module manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command",
+		fmt.Printf("A Go module manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command\n",
 			Bold(Color("usage:", PURPLE)),
 			Italic(
 				"gopher",
@@ -359,7 +379,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 			Italic(
 				"gopher",
 				Color("help", BLUE),
-				Color("[COMMANDS]", CYAN),
+				Color("[COMMAND]", CYAN),
 			),
 		)
 	}
