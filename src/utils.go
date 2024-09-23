@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -50,6 +52,104 @@ func Bold(text ...string) string {
 	return "\x1b[1m" + strings.Join(text, " \x1b[1m") + "\x1b[0m"
 }
 
+func CreatePreferencesFile() {
+	whoamiCmd := exec.Command("whoami")
+	user := string(Unwrap(whoamiCmd.CombinedOutput()))
+	user = strings.ReplaceAll(user, "\n", "")
+	prefPath := fmt.Sprintf("/home/%s/.config/gopher", user)
+	prefFile := prefPath + "/Preferences"
+	mkdirCmd := exec.Command("mkdir", "-p", prefPath)
+	Unwrap(mkdirCmd.CombinedOutput())
+	f := Unwrap(os.Create(prefFile))
+	defer f.Close()
+	f.WriteString(DEFAULT_PREFERENCES)
+	fmt.Printf("%s %s", 
+		Color(Bold("Preferences"), GRAY),
+		Color("file created at ~/.config/gopher\n", GRAY),
+	)
+}
+
+type Preference int
+const (
+	PrefPkgQueryLimit = iota
+	PrefOpArchPairs
+)
+
+var preferenceName = map[Preference]string {
+	
+}
+func (p Preference) String() string {
+	return preferenceName[p]
+}
+
+func GetPreference[T any](name Preference) (T, error) {
+	var result any
+	result = 0
+	whoamiCmd := exec.Command("whoami")
+	user := string(Unwrap(whoamiCmd.CombinedOutput()))
+	user = strings.ReplaceAll(user, "\n", "")
+	prefPath := fmt.Sprintf("/home/%s/.config/gopher", user)
+	prefFile := prefPath + "/Preferences"
+	fileContent := string(UnwrapOrElse(os.ReadFile(prefFile))(func() []byte {
+		CreatePreferencesFile()
+		return []byte(DEFAULT_PREFERENCES)
+	}))
+	prefLines := strings.Split(fileContent, "\n")
+	// grab the file data from here
+	prefMap := make(map[string]string)
+	for _, prefLine := range prefLines {
+		prefLine = strings.Trim(prefLine, " \n\t")
+		if prefLine == "" {continue}
+		kvPair := strings.Split(prefLine, "=")
+		if len(kvPair) <= 1 { 
+			result = 0
+			return result.(T), errors.New(
+				"no value found for key " + 
+				Bold(kvPair[0]) +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+		kvPair[0] = strings.Trim(kvPair[0], " \n\t")
+		kvPair[1] = strings.Trim(kvPair[1], " \n\t")
+		prefMap[kvPair[0]] = kvPair[1]
+	}
+
+	switch name {
+	case PrefPkgQueryLimit:
+		if prefMap["PkgQueryLimit"] == "" {
+			result = 0
+			return result.(T), errors.New(
+				"no value found for key " + 
+				Bold("PkgQueryLimit") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+		result = Unwrap(strconv.Atoi(prefMap["PkgQueryLimit"])) 
+
+		return result.(T), nil
+	case PrefOpArchPairs:
+		if prefMap["OpArchPairs"] == "" {
+			result = 0
+			return result.(T), errors.New(
+				"no value found for key " + 
+				Bold("OpArchPairs") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+		oparshArr := strings.Split(prefMap["OpArchPairs"], ",")
+		result = [][]string{}
+		for i := 1; i < len(oparshArr); i += 2 {
+			op := strings.Trim(oparshArr[i-1], " \t\n")
+			arch := strings.Trim(oparshArr[i], " \t\n")
+			result = append(result.([][]string), []string{op,arch})	
+		}
+
+		return result.(T), nil
+	default:
+		return result.(T), errors.New(fmt.Sprintf("preference key '%s' not found", name))
+	}
+}
+
 func Unwrap[T any](val T, err error) T {
 	if err != nil { handleErr(&CmdError {CmdInvalid, err.Error()}) }
 
@@ -66,6 +166,19 @@ func UnwrapOr[T any](val T, err error) func(T) T {
 			return val
 		}
 	}
+}
+
+func UnwrapOrElse[T any](val T, err error) func(func() T) T {
+	if err != nil {
+		return func(fn func() T) T {
+			return fn()
+		}
+	} else {
+		return func(_ func() T) T {
+			return val
+		}
+	}
+
 }
 
 func Expect(err error) {

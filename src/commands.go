@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,52 +16,6 @@ import (
 )
 
 
-var pad string = "    "
-var opsysList [][]string = [][]string {
-	{"windows", "amd64"},
-	{"windows", "arm64"},
-	{"linux", "amd64"},
-	{"linux", "arm64"},
-	{"darwin", "amd64"},
-	{"darwin", "arm64"},
-}
-
-type Command int
-const (
-	CmdNew = iota
-	CmdAdd
-	CmdHelp
-	CmdTidy
-	CmdBuild
-	CmdConfig
-	CmdRun
-	CmdVersion
-	CmdInvalid
-)
-
-var commandName = map[Command]string {
-	CmdNew: "new",
-	CmdAdd: "add",
-	CmdHelp: "help",
-	CmdTidy: "tidy",
-	CmdBuild: "build",
-	CmdConfig: "config",
-	CmdRun: "run",
-	CmdVersion: "version",
-	CmdInvalid: "invalid",
-}
-func (c Command) String() string {
-	return commandName[c]
-}
-
-type CmdError struct {
-	Type Command
-	Msg string
-}
-
-func (c CmdError) Error() string {
-	return c.Msg
-}
 
 func RunCmd(cmd string, a... string) *CmdError {
 	var args []string
@@ -106,7 +61,6 @@ func RunCmd(cmd string, a... string) *CmdError {
 			return help("")
 		}
 		return help(args[0], args[1:]...)
-	case "config": config()
 	case "version": version()
 	default: return &CmdError {
 		Type: CmdInvalid,
@@ -128,7 +82,7 @@ func new(path string) *CmdError {
 	// name := pathArr[len(pathArr) - 1]
 
 	name := path
-	Unwrap(fmt.Printf("%sCreated binary '%s' module\n", pad, name))
+	Unwrap(fmt.Printf("%sCreated binary '%s' module\n", PAD, name))
 	Expect(os.Mkdir(name, 0755))
 	Expect(os.Chdir(name))
 	goCmd := exec.Command("go", "mod", "init", path)
@@ -152,7 +106,7 @@ func new(path string) *CmdError {
 }
 
 func build(args ...string) *CmdError {
-	var opsysPairs [][]string 
+	var oparchPairs [][]string 
 	var announceBuild bool
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
@@ -189,19 +143,19 @@ func build(args ...string) *CmdError {
 	
 	if len(args) > 0 {
 		if args[0] == "--cross-platform" || args[0] == "-x" {
-			opsysPairs = opsysList
+			oparchPairs = Unwrap(GetPreference[[][]string](PrefOpArchPairs))
 			announceBuild = true
 		} else {
-			opsysPairs = [][]string{{osv, arch}}
+			oparchPairs = [][]string{{osv, arch}}
 		}
 	} else {
-		opsysPairs = [][]string{{osv, arch}}
+		oparchPairs = [][]string{{osv, arch}}
 	}
 	var wg sync.WaitGroup
-	errs := make(chan error, len(opsysPairs))
+	errs := make(chan error, len(oparchPairs))
 	mainErr := make(chan string, 1)
 
-	for _, item := range opsysPairs {
+	for _, item := range oparchPairs {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -212,7 +166,7 @@ func build(args ...string) *CmdError {
 			if announceBuild {
 				fmt.Printf(
 					"%sBuilding %s binary for %s architecture\n", 
-					pad, sysop, sysarch,
+					PAD, sysop, sysarch,
 				)
 			}
 
@@ -221,11 +175,17 @@ func build(args ...string) *CmdError {
 					"./bin/%s",
 					module,
 				)
-				if len(args) > 0 {
+				if len(args) > 0 && !slices.Contains(args, "-x") && !slices.Contains(args, "--cross-platform") {
 					args = append([]string{"build"}, args...)
 					buildCmd = exec.Command("go", args...)
 				} else {
 					buildCmd = exec.Command("go", "build", "-o", name, "./src/")
+				}
+
+				o, _ := buildCmd.CombinedOutput()
+
+				if len(o) > 1 {
+					mainErr <- string(o)
 				}
 			} else {
 				name = fmt.Sprintf(
@@ -241,15 +201,7 @@ func build(args ...string) *CmdError {
 					name, 
 				)
 				buildCmd = exec.Command("bash", "-c", buildCmdStr)
-			}
 
-			if osv == sysop && arch == sysarch {
-				o, _ := buildCmd.CombinedOutput()
-
-				if len(o) > 1 {
-					mainErr <- string(o)
-				}
-			} else {
 				if err := buildCmd.Run(); err != nil {
 					errs <- errors.New(
 						fmt.Sprintf("could not build %s binary for %s architecture",
@@ -332,7 +284,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("[...ARGS]", CYAN),
 				),
 				Bold(Color("arguments:", PURPLE)),
-				pad + "-x,--cross-platform" + "\t\t" + "build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
+				PAD + "-x,--cross-platform" + "\t\t" + "build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
@@ -375,14 +327,14 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				Color("[...ARGS]", CYAN),
 			),
 			Bold(Color("commands:", PURPLE)),
-			pad + "add" + "\t\t" + "add dependencies to current module and install them",
-			pad + "build" + "\t" + "compile packages and dependencies",
-			pad + "config" + "\t" + "configure gopher settings",
-			pad + "help" + "\t" + "this",
-			pad + "new" + "\t\t" + "create new go module",
-			pad + "run" + "\t\t" + "compile and run Go program",
-			pad + "test" + "\t" + "run Go test packages",
-			pad + "version" + "\t" + "print Go version",
+			PAD + "add" + "\t\t" + "add dependencies to current module and install them",
+			PAD + "build" + "\t" + "compile packages and dependencies",
+			PAD + "config" + "\t" + "configure gopher settings",
+			PAD + "help" + "\t" + "this",
+			PAD + "new" + "\t\t" + "create new go module",
+			PAD + "run" + "\t\t" + "compile and run Go program",
+			PAD + "test" + "\t" + "run Go test packages",
+			PAD + "version" + "\t" + "print Go version",
 			Italic(
 				"gopher",
 				Color("help", BLUE),
@@ -400,7 +352,14 @@ func add(pkg string) *CmdError {
 		out, _ := getCmd.CombinedOutput()
 		fmt.Print(string(out))
 	} else {
-		pkgQueryLimit := 10 + 1
+		pkgQueryLimit := Unwrap(GetPreference[int](PrefPkgQueryLimit)) + 1
+		if pkgQueryLimit > 101 { 
+			pkgQueryLimit--
+			return &CmdError {
+				Type: CmdAdd,
+				Msg: fmt.Sprintf("PkgQueryLimit (%d) >100", pkgQueryLimit),
+			}
+		} else if pkgQueryLimit == 101 { pkgQueryLimit-- } 
 		url := fmt.Sprintf(
 			"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
 			pkgQueryLimit,
@@ -467,7 +426,7 @@ func add(pkg string) *CmdError {
 			pkgDesc = strings.ReplaceAll(pkgDesc, "&#34;", "\"")
 			pkgDesc = strings.ReplaceAll(pkgDesc, "&#39;", "'")
 			if len(pkgDesc) > 0 {
-				fmt.Printf("%s%s\n", pad, pkgDesc)
+				fmt.Printf("%s%s\n", PAD, pkgDesc)
 			}
 			pkgNames = append([]string{pkgName}, pkgNames...)
 		}
@@ -523,6 +482,46 @@ func add(pkg string) *CmdError {
 
 func test() {}
 func tidy() {}
-func config() {}
 func version() {}
+
+var PAD string = "    "
+var DEFAULT_PREFERENCES = `PkgQueryLimit=10
+OpArchPairs=windows,amd64,windows,arm64,linux,amd64,linux,arm64,darwin,amd64,darwin,arm64`
+
+type Command int
+const (
+	CmdNew = iota
+	CmdAdd
+	CmdHelp
+	CmdTidy
+	CmdBuild
+	CmdConfig
+	CmdRun
+	CmdVersion
+	CmdInvalid
+)
+
+var commandName = map[Command]string {
+	CmdNew: "new",
+	CmdAdd: "add",
+	CmdHelp: "help",
+	CmdTidy: "tidy",
+	CmdBuild: "build",
+	CmdConfig: "config",
+	CmdRun: "run",
+	CmdVersion: "version",
+	CmdInvalid: "invalid",
+}
+func (c Command) String() string {
+	return commandName[c]
+}
+
+type CmdError struct {
+	Type Command
+	Msg string
+}
+
+func (c CmdError) Error() string {
+	return c.Msg
+}
 
