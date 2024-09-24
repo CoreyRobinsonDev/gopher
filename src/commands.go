@@ -352,14 +352,13 @@ func add(pkg string) *CmdError {
 		out, _ := getCmd.CombinedOutput()
 		fmt.Print(string(out))
 	} else {
-		pkgQueryLimit := Unwrap(GetPreference[int](PrefPkgQueryLimit)) + 1
-		if pkgQueryLimit > 101 { 
-			pkgQueryLimit--
+		pkgQueryLimit := Unwrap(GetPreference[int](PrefPkgQueryLimit))
+		if pkgQueryLimit > 100 { 
 			return &CmdError {
 				Type: CmdAdd,
 				Msg: fmt.Sprintf("PkgQueryLimit (%d) >100", pkgQueryLimit),
 			}
-		} else if pkgQueryLimit == 101 { pkgQueryLimit-- } 
+		} 
 		url := fmt.Sprintf(
 			"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
 			pkgQueryLimit,
@@ -375,6 +374,9 @@ func add(pkg string) *CmdError {
 
 		for i, line := range lines {
 			if strings.Contains(line, "\"SearchSnippet\"") {
+				lineNums = append(lineNums, i)
+			}
+			if i == len(lines) - 1 {
 				lineNums = append(lineNums, i)
 			}
 		}
