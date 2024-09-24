@@ -239,51 +239,50 @@ func run(args ...string) *CmdError {
 	args = append([]string {"run", "./src/"}, args...)
 	runCmd := exec.Command("go", args...)
 	output, e := runCmd.CombinedOutput()
-	fmt.Print(string(output))
 
-	// TODO: hide this behind a preference option
-	if e == nil { return nil }
-	outputLines := strings.Split(string(output), "\n")
-	for _, line := range outputLines {
-		if !strings.Contains(line, ":") { continue }
-		arr := strings.Split(line, ":")
-		file := arr[0]
-		rownum := Unwrap(strconv.Atoi(arr[1]))
-		colnum := Unwrap(strconv.Atoi(arr[2]))
-		err := strings.Trim(strings.Join(arr[3:], ":"), " \t\n")
-		f := Unwrap(os.Open("./" + file))
-		previewLines := 2
-		defer f.Close()
-		reader := bufio.NewScanner(f)
+	if Unwrap(GetPreference[bool](PrefPrettyPrint)) && e != nil {
+		outputLines := strings.Split(string(output), "\n")
+		for _, line := range outputLines {
+			if !strings.Contains(line, ":") { continue }
+			arr := strings.Split(line, ":")
+			file := arr[0]
+			rownum := Unwrap(strconv.Atoi(arr[1]))
+			colnum := Unwrap(strconv.Atoi(arr[2]))
+			err := strings.Trim(strings.Join(arr[3:], ":"), " \t\n")
+			f := Unwrap(os.Open("./" + file))
+			previewLines := Unwrap(GetPreference[int](PrefPrettyPrintPreviewLines))
+			defer f.Close()
+			reader := bufio.NewScanner(f)
 
-		fmt.Printf("[%s]\n", Color(file, BLUE))
-		linenum := 0
-		for reader.Scan() {
-			linenum++
-			if dif := linenum - rownum; dif <= previewLines && dif >= -previewLines {
-				tabs := strings.Count(reader.Text(), "\t")
-				if linenum == rownum {
-					fmt.Printf("%s %s%s\n",
-						Color(strconv.Itoa(linenum), GRAY), 
-						strings.Repeat("  ", tabs),
-						Italic(strings.Trim(reader.Text(), " \t")),
-					)
-				} else {
-					fmt.Printf("%s %s%s\n",
-						Color(strconv.Itoa(linenum), GRAY), 
-						strings.Repeat("  ", tabs),
-						strings.Trim(reader.Text(), " \t"),
-					)
+			fmt.Printf("[%s]\n", Color(file, BLUE))
+			linenum := 0
+			for reader.Scan() {
+				linenum++
+				if dif := linenum - rownum; dif <= previewLines && dif >= -previewLines {
+					tabs := strings.Count(reader.Text(), "\t")
+					if linenum == rownum {
+						fmt.Printf("%s %s%s\n",
+							Color(strconv.Itoa(linenum), GRAY), 
+							strings.Repeat("  ", tabs),
+							Italic(strings.Trim(reader.Text(), " \t")),
+						)
+					} else {
+						fmt.Printf("%s %s%s\n",
+							Color(strconv.Itoa(linenum), GRAY), 
+							strings.Repeat("  ", tabs),
+							strings.Trim(reader.Text(), " \t"),
+						)
+					}
 				}
+				if linenum == rownum {
+					tabs := strings.Count(reader.Text(), "\t")
+					pad := strings.Repeat(" ", colnum + len(strconv.Itoa(linenum))-tabs)
+					fmt.Printf("%s%s%s\n", strings.Repeat("  ", tabs), pad, Color("^ " +err, RED))
+				}
+				if linenum > rownum + previewLines { fmt.Println(); break }
 			}
-			if linenum == rownum {
-				tabs := strings.Count(reader.Text(), "\t")
-				pad := strings.Repeat(" ", colnum + len(strconv.Itoa(linenum))-tabs)
-				fmt.Printf("%s%s%s\n", strings.Repeat("  ", tabs), pad, Color("^ " +err, RED))
-			}
-			if linenum > rownum + previewLines { fmt.Println(); break }
 		}
-	}
+	} else { fmt.Print(string(output)) }
 
 	return nil
 }

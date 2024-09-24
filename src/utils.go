@@ -73,6 +73,8 @@ type Preference int
 const (
 	PrefPkgQueryLimit = iota
 	PrefOpArchPairs
+	PrefPrettyPrint
+	PrefPrettyPrintPreviewLines
 )
 
 var preferenceName = map[Preference]string {
@@ -116,8 +118,8 @@ func GetPreference[T any](name Preference) (T, error) {
 
 	switch name {
 	case PrefPkgQueryLimit:
+		result = 0
 		if prefMap["PkgQueryLimit"] == "" {
-			result = 0
 			return result.(T), errors.New(
 				"no value found for key " + 
 				Bold("PkgQueryLimit") +
@@ -128,8 +130,8 @@ func GetPreference[T any](name Preference) (T, error) {
 
 		return result.(T), nil
 	case PrefOpArchPairs:
+		result = [][]string{}
 		if prefMap["OpArchPairs"] == "" {
-			result = 0
 			return result.(T), errors.New(
 				"no value found for key " + 
 				Bold("OpArchPairs") +
@@ -137,11 +139,51 @@ func GetPreference[T any](name Preference) (T, error) {
 			) 
 		}
 		oparshArr := strings.Split(prefMap["OpArchPairs"], ",")
-		result = [][]string{}
 		for i := 1; i < len(oparshArr); i += 2 {
 			op := strings.Trim(oparshArr[i-1], " \t\n")
 			arch := strings.Trim(oparshArr[i], " \t\n")
 			result = append(result.([][]string), []string{op,arch})	
+		}
+
+		return result.(T), nil
+	case PrefPrettyPrint:
+		result = false
+		if prefMap["PrettyPrint"] == "" {
+			return result.(T), errors.New(
+				"no value found for key " + 
+				Bold("PrettyPrint") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+		if prefMap["PrettyPrint"] == "true" {
+			result = true
+			return result.(T), nil
+		} else if prefMap["PrettyPrint"] == "false" {
+			return result.(T), nil
+		} else {
+			return result.(T), errors.New(
+				"non-boolean value found for key " + 
+				Bold("PrettyPrint") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+	case PrefPrettyPrintPreviewLines:
+		result = 0
+		if prefMap["PrettyPrintPreviewLines"] == "" {
+			return result.(T), errors.New(
+				"no value found for key " + 
+				Bold("PrettyPrintPreviewLines") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		}
+		r, err := strconv.Atoi(prefMap["PrettyPrintPreviewLines"])
+		result = r
+		if err != nil || r < 0 {
+			return result.(T), errors.New(
+				"non-numeric or negative integer value found for key " + 
+				Bold("PrettyPrintPreviewLines") +
+				" in ~/.config/gopher/Preferences",
+			) 
 		}
 
 		return result.(T), nil
