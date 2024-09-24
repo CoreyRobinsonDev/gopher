@@ -352,6 +352,7 @@ func add(pkg string) *CmdError {
 		out, _ := getCmd.CombinedOutput()
 		fmt.Print(string(out))
 	} else {
+		horizonalCharLimit := 80
 		pkgQueryLimit := Unwrap(GetPreference[int](PrefPkgQueryLimit))
 		if pkgQueryLimit > 100 { 
 			return &CmdError {
@@ -428,7 +429,20 @@ func add(pkg string) *CmdError {
 			pkgDesc = strings.ReplaceAll(pkgDesc, "&#34;", "\"")
 			pkgDesc = strings.ReplaceAll(pkgDesc, "&#39;", "'")
 			if len(pkgDesc) > 0 {
-				fmt.Printf("%s%s\n", PAD, pkgDesc)
+				substring := ""
+				for _, ch := range pkgDesc {
+					substring += string(ch)
+					if len(substring) == horizonalCharLimit {
+						substringArr := strings.Split(substring, " ")
+						fmt.Printf("%s%s\n", PAD, 
+							strings.Join(substringArr[:len(substringArr)-1], " "),
+						)
+						substring = substringArr[len(substringArr)-1]
+					}
+				}
+				if len(substring) > 0 {
+					fmt.Printf("%s%s\n", PAD, substring)
+				}
 			}
 			pkgNames = append([]string{pkgName}, pkgNames...)
 		}
