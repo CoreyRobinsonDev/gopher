@@ -397,12 +397,6 @@ func add(pkg string) *CmdError {
 	} else {
 		horizonalCharLimit := 80
 		pkgQueryLimit := Unwrap(GetPreference[int](PrefPkgQueryLimit))
-		if pkgQueryLimit > 100 { 
-			return &CmdError {
-				Type: CmdAdd,
-				Msg: fmt.Sprintf("PkgQueryLimit (%d) >100", pkgQueryLimit),
-			}
-		} 
 		url := fmt.Sprintf(
 			"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
 			pkgQueryLimit,
@@ -499,14 +493,14 @@ func add(pkg string) *CmdError {
 		)
 		reader := bufio.NewReader(os.Stdin)
 		in := Unwrap(reader.ReadString('\n'))
-		in = in[:len(in)-1]
+		in = strings.Trim(in, " \t\n")
 		opt, err := strconv.Atoi(in)
-		if err != nil || opt >= pkgQueryLimit {
+		if err != nil || opt >= pkgQueryLimit || opt < 1 {
 			return &CmdError {
 				Type: CmdAdd,
-				Msg: fmt.Sprintf("index '%s' not found\n\nenter a numeric value from 1-%d",
+				Msg: fmt.Sprintf("index '%s' not found\n\nenter an integer value from 1-%d",
 					in,
-					pkgQueryLimit-1,
+					pkgQueryLimit,
 				),
 			}
 		}

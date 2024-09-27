@@ -126,7 +126,15 @@ func GetPreference[T any](name Preference) (T, error) {
 				" in ~/.config/gopher/Preferences",
 			) 
 		}
-		result = Unwrap(strconv.Atoi(prefMap["PkgQueryLimit"])) 
+		r, err := strconv.Atoi(prefMap["PkgQueryLimit"])
+		result = r
+		if err != nil || result.(int) > 100 || result.(int) < 1 {
+			return result.(T), errors.New(
+				"non-numeric or integer value out side of range 1-100 found for key " + 
+				Bold("PkgQueryLimit") +
+				" in ~/.config/gopher/Preferences",
+			) 
+		} 
 
 		return result.(T), nil
 	case PrefOpArchPairs:
