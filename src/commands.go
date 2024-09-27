@@ -356,14 +356,29 @@ func help(cmd string, moreCmds ...string) *CmdError {
 			} else {
 				help("")
 			}
-		case "config": 
+		case "version": 
+			fmt.Printf("print Go version\n\n%s %s\n",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("version", BLUE),
+				),
+			)
+		case "tidy": 
+			fmt.Printf("add missing and remove unused modules\n\n%s %s\n",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("tidy", BLUE),
+				),
+			)
 		default: return &CmdError {
 			Type: CmdHelp,
 			Msg: fmt.Sprintf("no such command: %s", cmd),
 		}
 		}
 	} else {
-		fmt.Printf("A Go module manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command\n",
+		fmt.Printf("A Go project manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command\n",
 			Bold(Color("usage:", PURPLE)),
 			Italic(
 				"gopher",
@@ -373,11 +388,11 @@ func help(cmd string, moreCmds ...string) *CmdError {
 			Bold(Color("commands:", PURPLE)),
 			PAD + "add" + "\t\t" + "add dependencies to current module and install them",
 			PAD + "build" + "\t" + "compile packages and dependencies",
-			PAD + "config" + "\t" + "configure gopher settings",
 			PAD + "help" + "\t" + "this",
 			PAD + "new" + "\t\t" + "create new go module",
 			PAD + "run" + "\t\t" + "compile and run Go program",
 			PAD + "test" + "\t" + "run Go test packages",
+			PAD + "tidy" + "\t" + "add missing and remove unused modules",
 			PAD + "version" + "\t" + "print Go version",
 			Italic(
 				"gopher",
