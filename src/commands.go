@@ -61,7 +61,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 			return help("")
 		}
 		return help(args[0], args[1:]...)
-	case "version": version()
+	case "version": return version()
 	default: return &CmdError {
 		Type: CmdInvalid,
 		Msg: fmt.Sprintf("no such command: %s", cmd),
@@ -533,9 +533,14 @@ func add(pkg string) *CmdError {
 	return nil
 }
 
-func test() {}
+func version() *CmdError {
+	versionCmd := exec.Command("go", "version")
+	fmt.Println("gopher version 1.0.0")
+	fmt.Print(string(Unwrap(versionCmd.Output())))
+	return nil
+}
 func tidy() {}
-func version() {}
+func test() {}
 
 var PAD string = "    "
 var DEFAULT_PREFERENCES = `PkgQueryLimit=10
