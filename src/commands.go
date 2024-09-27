@@ -56,6 +56,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 	case "test": test()
 	case "build": return build(args...)
 	case "run": return run(args...)
+	case "tidy": return tidy()
 	case "help": 
 		if len(args) == 0 {
 			return help("")
@@ -539,7 +540,17 @@ func version() *CmdError {
 	fmt.Print(string(Unwrap(versionCmd.Output())))
 	return nil
 }
-func tidy() {}
+func tidy() *CmdError {
+	tidyCmd := exec.Command("go", "mod","tidy")
+	output, err := tidyCmd.CombinedOutput()
+	if err != nil { 
+		return &CmdError {
+			Type: CmdTidy,
+			Msg: strings.Split(string(output)[:len(output)-1], ": ")[1],
+		}
+	}
+	return nil
+}
 func test() {}
 
 var PAD string = "    "
