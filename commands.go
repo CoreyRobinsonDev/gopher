@@ -90,10 +90,9 @@ func new(path string) *CmdError {
 	gitCmd := exec.Command("git", "init")
 	Expect(goCmd.Run())
 	Expect(gitCmd.Run())
-	Expect(os.Mkdir("src", 0755))
 	Expect(os.Mkdir("bin", 0755))
 
-	f1 := Unwrap(os.Create("./src/main.go"))
+	f1 := Unwrap(os.Create("./main.go"))
 	f2 := Unwrap(os.Create("./.gitignore"))
 	f3 := Unwrap(os.Create("./README.md"))
 	defer f1.Close()
@@ -180,7 +179,7 @@ func build(args ...string) *CmdError {
 					args = append([]string{"build"}, args...)
 					buildCmd = exec.Command("go", args...)
 				} else {
-					buildCmd = exec.Command("go", "build", "-o", name, "./src/")
+					buildCmd = exec.Command("go", "build", "-o", name, ".")
 				}
 
 				o, _ := buildCmd.CombinedOutput()
@@ -196,7 +195,7 @@ func build(args ...string) *CmdError {
 					sysop,	
 				)
 				buildCmdStr := fmt.Sprintf(
-					"GOOS=%s GOARCH=%s go build -o %s ./src/",
+					"GOOS=%s GOARCH=%s go build -o %s .",
 					sysop,
 					sysarch,
 					name, 
@@ -237,7 +236,7 @@ func build(args ...string) *CmdError {
 }
 
 func run(args ...string) *CmdError {
-	args = append([]string {"run", "./src/"}, args...)
+	args = append([]string {"run", "."}, args...)
 	runCmd := exec.Command("go", args...)
 	output, e := runCmd.CombinedOutput()
 
@@ -246,6 +245,7 @@ func run(args ...string) *CmdError {
 		for _, line := range outputLines {
 			if !strings.Contains(line, ":") { continue }
 			arr := strings.Split(line, ":")
+			fmt.Println(arr)
 			file := arr[0]
 			rownum := Unwrap(strconv.Atoi(arr[1]))
 			colnum := Unwrap(strconv.Atoi(arr[2]))
@@ -319,7 +319,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 			)
 		case "test": 
 		case "build": 
-			fmt.Printf("compile packages and dependencies\n\n%s should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go\n\n%s %s\n\n%s\n%s\n\n%s %s\n",
+			fmt.Printf("compile packages and dependencies\n\n%s should be executed at the root of your module and will expect the entry point of your program to be main.go\n\n%s %s\n\n%s\n%s\n\n%s %s\n",
 				Bold("gopher build"),
 				Bold(Color("usage:", PURPLE)),
 				Italic(
@@ -336,7 +336,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				),
 			)
 		case "run": 
-			fmt.Printf("compile and run Go program\n\n%s should be executed at the root of your module and will expect the entry point of your program to be ./src/main.go\n\n%s %s\n\n%s %s\n",
+			fmt.Printf("compile and run Go program\n\n%s should be executed at the root of your module and will expect the entry point of your program to be main.go\n\n%s %s\n\n%s %s\n",
 				Bold("gopher run"),
 				Bold(Color("usage:", PURPLE)),
 				Italic(
