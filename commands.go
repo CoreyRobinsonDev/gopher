@@ -245,7 +245,6 @@ func run(args ...string) *CmdError {
 		for _, line := range outputLines {
 			if !strings.Contains(line, ":") { continue }
 			arr := strings.Split(line, ":")
-			fmt.Println(arr)
 			file := arr[0]
 			rownum := Unwrap(strconv.Atoi(arr[1]))
 			colnum := Unwrap(strconv.Atoi(arr[2]))
