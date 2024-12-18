@@ -53,7 +53,7 @@ func RunCmd(cmd string, a... string) *CmdError {
 			}
 		}
 		return add(args[0])
-	case "test": test()
+	case "test": return test(args...)
 	case "build": return build(args...)
 	case "run": return run(args...)
 	case "tidy": return tidy()
@@ -68,8 +68,6 @@ func RunCmd(cmd string, a... string) *CmdError {
 		Msg: fmt.Sprintf("no such command: %s", cmd),
 	}
 	}
-
-	return nil
 }
 
 func new(path string) *CmdError {
@@ -565,7 +563,77 @@ func tidy() *CmdError {
 	}
 	return nil
 }
-func test() {}
+func test(args ...string) *CmdError {
+	args = append([]string {"test", "-v"}, args...)
+	runCmd := exec.Command("go", args...)
+	output, _ := runCmd.CombinedOutput()
+
+	newOutput := ""
+	passes := 0
+	totalTests := 0
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.Contains(line, "=== RUN  ") {
+			totalTests++
+			functionName := strings.Split(string(line), " ")[len(strings.Split(string(line), " "))-1]
+			newOutput += fmt.Sprintln(
+				"==>",
+				Color(functionName, BLUE),
+			)
+		} else if strings.Contains(line, "--- PASS: ") ||
+		strings.Contains(line, "--- FAIL: ") {
+			lineArr := strings.Split(line, " ")
+			time := lineArr[len(lineArr)-1]
+			functionName := lineArr[2]
+			outcome := lineArr[1]
+			before, after, _ := strings.Cut(newOutput, functionName)
+
+			if outcome == "PASS:" {
+				passes++
+				outcome = Color(" PASS", GREEN)
+			} else if outcome == "FAIL:" {
+				outcome = Color(" FAIL", RED)
+			}
+
+			newOutput = fmt.Sprint(
+				before, 
+				Color(functionName, BLUE), 
+				time, 
+				outcome, 
+				after,
+			)
+		} else {
+			newOutput += fmt.Sprintln(line)
+		}
+	}
+	newOutput = newOutput[:len(newOutput)-2] 
+	newOutputArr := strings.Split(newOutput, "\n")
+	lastLine := newOutputArr[len(newOutputArr)-1]
+	lastLineArr := strings.Split(lastLine, "\t")
+	finalOutcome := strings.Trim(lastLineArr[0], " ")
+	projectName := lastLineArr[1]
+	totalTime := lastLineArr[2]
+
+	if finalOutcome == "ok" {
+		finalOutcome = Color(fmt.Sprintf(
+			"PASS(%d/%d)", passes, totalTests, 
+			), GREEN)
+		newOutput = strings.Join(newOutputArr[:len(newOutputArr)-2], "\n")
+	} else if finalOutcome == "FAIL" {
+		finalOutcome = Color(fmt.Sprintf(
+			"FAIL(%d/%d)", passes, totalTests, 
+			), RED)
+		newOutput = strings.Join(newOutputArr[:len(newOutputArr)-3], "\n")
+	}
+
+
+	fmt.Println(newOutput)
+	fmt.Println("\n",
+		Bold(projectName) + "(" + totalTime + ")", 
+		finalOutcome,
+	)
+
+	return nil
+}
 
 var PAD string = "    "
 var DEFAULT_PREFERENCES = `PkgQueryLimit=10
@@ -580,6 +648,7 @@ const (
 	CmdBuild
 	CmdConfig
 	CmdRun
+	CmdTest
 	CmdVersion
 	CmdInvalid
 )
@@ -592,6 +661,7 @@ var commandName = map[Command]string {
 	CmdBuild: "build",
 	CmdConfig: "config",
 	CmdRun: "run",
+	CmdTest: "test",
 	CmdVersion: "version",
 	CmdInvalid: "invalid",
 }
