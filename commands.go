@@ -315,6 +315,13 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				),
 			)
 		case "test": 
+			fmt.Printf("run _test.go files\n\n%s %s\n",
+				Bold(Color("example:", PURPLE)),
+				Italic(
+					"gopher",
+					Color("test", BLUE),
+				),
+			)
 		case "build": 
 			fmt.Printf("compile packages and dependencies\n\n%s should be executed at the root of your module and will expect the entry point of your program to be main.go\n\n%s %s\n\n%s\n%s\n\n%s %s\n",
 				Bold("gopher build"),
