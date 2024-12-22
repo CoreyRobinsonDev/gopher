@@ -3,12 +3,13 @@
 [![Report](https://goreportcard.com/badge/github.com/CoreyRobinsonDev/gopher)](https://goreportcard.com/report/github.com/CoreyRobinsonDev/gopher)
 
 **Gopher** is a Go project management CLI tool.
+[Usage](#Usage) <span>&nbsp;•&nbsp;</span> [Preferences](#Preferences) <span>&nbsp;•&nbsp;</span> [Install](#Install)
 
 # Usage
 <details>
     <summary><code>gopher add</code></summary>
 
-    ❯ gopher help add
+    > gopher help add
     $ Add dependencies to current module and install them.
     $ 
     $ When a full package name isn't provided gopher add will do a search on pkg.go.dev for matching packages. The number of results returned on this search can be adjusted with gopher config.
@@ -19,7 +20,7 @@
 <details>
     <summary><code>gopher build</code></summary>
 
-    ❯ gopher help build
+    > gopher help build
     $ compile packages and dependencies
     $ 
     $ gopher build should be executed at the root of your module and will expect the entry point of your program to be main.go
@@ -34,7 +35,7 @@
 <details>
     <summary><code>gopher help</code></summary>
 
-    ❯ gopher help help
+    > gopher help help
     $ A Go project manager
     $ 
     $ usage: gopher [COMMAND] [...ARGS]
@@ -54,7 +55,7 @@
 <details>
     <summary><code>gopher new</code></summary>
 
-    ❯ gopher help new
+    > gopher help new
     $ create new go module
     $ 
     $ example: gopher new github.com/user/mymodule
@@ -62,7 +63,7 @@
 <details>
     <summary><code>gopher run</code></summary>
 
-    ❯ gopher help run
+    > gopher help run
     $ compile and run Go program
     $ 
     $ gopher run should be executed at the root of your module and will expect the entry point of your program to be main.go
@@ -74,7 +75,7 @@
 <details>
     <summary><code>gopher test</code></summary>
 
-    ❯ gopher help test
+    > gopher help test
     $ run _test.go files
     $ 
     $ example: gopher test
@@ -82,7 +83,7 @@
 <details>
     <summary><code>gopher tidy</code></summary>
 
-    ❯ gopher help tidy
+    > gopher help tidy
     $ add missing and remove unused modules
     $ 
     $ example: gopher tidy
@@ -90,7 +91,7 @@
 <details>
     <summary><code>gopher version</code></summary>
 
-    ❯ gopher help version
+    > gopher help version
     $ print Go version
     $ 
     $ example: gopher version
@@ -110,15 +111,16 @@ On your initial call a **Preferences** file will be created at <code>~/.config/g
     PrettyPrintPreviewLines=3
 
 # Install
-[Binaries](https://github.com/CoreyRobinsonDev/gopher/releases)
+Download pre-built binary for your system here [Release](https://github.com/CoreyRobinsonDev/gopher/releases)
 
-### Compiling Source
+### Compiling from Source
 - Clone this repository
 ```bash
 git clone https://github.com/CoreyRobinsonDev/gopher.git
 ```
 - Create **gopher** binary
 ```bash
+cd gopher
 go build
 ```
 - Move binary to <code>/usr/local/bin</code> to call it from anywhere in the terminal
