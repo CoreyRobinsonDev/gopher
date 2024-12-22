@@ -15,17 +15,15 @@ import (
 	"time"
 )
 
-
-
-func RunCmd(cmd string, a... string) *CmdError {
+func RunCmd(cmd string, a ...string) *CmdError {
 	var args []string
 	if len(a) > 0 {
 		args = a[1:]
 	}
 	switch cmd {
-	case "new": 
+	case "new":
 		if len(args) == 0 {
-			return &CmdError {
+			return &CmdError{
 				Type: CmdNew,
 				Msg: fmt.Sprintf("go module requires repository location\n\n%s %s",
 					Bold(Color("example:", PURPLE)),
@@ -38,9 +36,9 @@ func RunCmd(cmd string, a... string) *CmdError {
 			}
 		}
 		return new(args[0])
-	case "add": 
+	case "add":
 		if len(args) == 0 {
-			return &CmdError {
+			return &CmdError{
 				Type: CmdAdd,
 				Msg: fmt.Sprintf("no go module specified\n\n%s %s",
 					Bold(Color("example:", PURPLE)),
@@ -53,20 +51,26 @@ func RunCmd(cmd string, a... string) *CmdError {
 			}
 		}
 		return add(args[0])
-	case "test": return test(args...)
-	case "build": return build(args...)
-	case "run": return run(args...)
-	case "tidy": return tidy()
-	case "help": 
+	case "test":
+		return test(args...)
+	case "build":
+		return build(args...)
+	case "run":
+		return run(args...)
+	case "tidy":
+		return tidy()
+	case "help":
 		if len(args) == 0 {
 			return help("")
 		}
 		return help(args[0], args[1:]...)
-	case "version": return version()
-	default: return &CmdError {
-		Type: CmdInvalid,
-		Msg: fmt.Sprintf("no such command: %s", cmd),
-	}
+	case "version":
+		return version()
+	default:
+		return &CmdError{
+			Type: CmdInvalid,
+			Msg:  fmt.Sprintf("no such command: %s", cmd),
+		}
 	}
 }
 
@@ -106,7 +110,7 @@ func new(path string) *CmdError {
 }
 
 func build(args ...string) *CmdError {
-	var oparchPairs [][]string 
+	var oparchPairs [][]string
 	var announceBuild bool
 	envCmd := exec.Command("go", "env")
 	grepOSCmd := exec.Command("grep", "GOHOSTOS")
@@ -131,8 +135,8 @@ func build(args ...string) *CmdError {
 	} else {
 		datArr = strings.Split(dat, " ")
 	}
-	module := datArr[len(datArr) - 1]
-	
+	module := datArr[len(datArr)-1]
+
 	OSout := string(Unwrap(io.ReadAll(grepOSCmdOut)))
 	ARCHout := string(Unwrap(io.ReadAll(grepARCHCmdOut)))
 	grepARCHCmd.Wait()
@@ -140,7 +144,7 @@ func build(args ...string) *CmdError {
 
 	osv := strings.Trim(strings.Split(OSout, "=")[1], " '\n\t")
 	arch := strings.Trim(strings.Split(ARCHout, "=")[1], " '\n\t")
-	
+
 	if len(args) > 0 {
 		if args[0] == "--cross-platform" || args[0] == "-x" {
 			oparchPairs = Unwrap(GetPreference[[][]string](PrefOpArchPairs))
@@ -165,7 +169,7 @@ func build(args ...string) *CmdError {
 			sysarch := item[1]
 			if announceBuild {
 				fmt.Printf(
-					"%sBuilding %s binary for %s architecture\n", 
+					"%sBuilding %s binary for %s architecture\n",
 					PAD, sysop, sysarch,
 				)
 			}
@@ -192,13 +196,13 @@ func build(args ...string) *CmdError {
 					"./bin/%s-%s-%s",
 					module,
 					sysarch,
-					sysop,	
+					sysop,
 				)
 				buildCmdStr := fmt.Sprintf(
 					"GOOS=%s GOARCH=%s go build -o %s .",
 					sysop,
 					sysarch,
-					name, 
+					name,
 				)
 				buildCmd = exec.Command("bash", "-c", buildCmdStr)
 
@@ -225,9 +229,9 @@ func build(args ...string) *CmdError {
 		if len(mainErr) > 0 {
 			fmt.Print(<-mainErr)
 		} else {
-			return &CmdError {
+			return &CmdError{
 				Type: CmdBuild,
-				Msg: errStr[:len(errStr)-1],
+				Msg:  errStr[:len(errStr)-1],
 			}
 		}
 	}
@@ -236,14 +240,16 @@ func build(args ...string) *CmdError {
 }
 
 func run(args ...string) *CmdError {
-	args = append([]string {"run", "."}, args...)
+	args = append([]string{"run", "."}, args...)
 	runCmd := exec.Command("go", args...)
 	output, e := runCmd.CombinedOutput()
 
 	if Unwrap(GetPreference[bool](PrefPrettyPrint)) && e != nil {
 		outputLines := strings.Split(string(output), "\n")
 		for _, line := range outputLines {
-			if !strings.Contains(line, ":") { continue }
+			if !strings.Contains(line, ":") {
+				continue
+			}
 			arr := strings.Split(line, ":")
 			file := arr[0]
 			rownum := Unwrap(strconv.Atoi(arr[1]))
@@ -262,13 +268,13 @@ func run(args ...string) *CmdError {
 					tabs := strings.Count(reader.Text(), "\t")
 					if linenum == rownum {
 						fmt.Printf("%s %s%s\n",
-							Color(strconv.Itoa(linenum), GRAY), 
+							Color(strconv.Itoa(linenum), GRAY),
 							strings.Repeat("  ", tabs),
 							Italic(strings.Trim(reader.Text(), " \t")),
 						)
 					} else {
 						fmt.Printf("%s %s%s\n",
-							Color(strconv.Itoa(linenum), GRAY), 
+							Color(strconv.Itoa(linenum), GRAY),
 							strings.Repeat("  ", tabs),
 							strings.Trim(reader.Text(), " \t"),
 						)
@@ -276,13 +282,18 @@ func run(args ...string) *CmdError {
 				}
 				if linenum == rownum {
 					tabs := strings.Count(reader.Text(), "\t")
-					pad := strings.Repeat(" ", colnum + len(strconv.Itoa(linenum))-tabs)
-					fmt.Printf("%s%s%s\n", strings.Repeat("  ", tabs), pad, Color("^ " +err, RED))
+					pad := strings.Repeat(" ", colnum+len(strconv.Itoa(linenum))-tabs)
+					fmt.Printf("%s%s%s\n", strings.Repeat("  ", tabs), pad, Color("^ "+err, RED))
 				}
-				if linenum > rownum + previewLines { fmt.Println(); break }
+				if linenum > rownum+previewLines {
+					fmt.Println()
+					break
+				}
 			}
 		}
-	} else { fmt.Print(string(output)) }
+	} else {
+		fmt.Print(string(output))
+	}
 
 	return nil
 }
@@ -290,7 +301,7 @@ func run(args ...string) *CmdError {
 func help(cmd string, moreCmds ...string) *CmdError {
 	if len(cmd) > 0 {
 		switch cmd {
-		case "new": 
+		case "new":
 			fmt.Printf("create new go module\n\n%s %s\n",
 				Bold(Color("example:", PURPLE)),
 				Italic(
@@ -299,7 +310,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					"github.com/user/mymodule",
 				),
 			)
-		case "add": 
+		case "add":
 			fmt.Printf("Add dependencies to current module and install them.\n\nWhen a full package name isn't provided %s will do a search on pkg.go.dev for matching packages. The number of results returned on this search can be adjusted with %s.\n\n%s %s\n%s %s\n",
 				Bold("gopher add"),
 				Bold("gopher config"),
@@ -316,7 +327,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					"gofiber",
 				),
 			)
-		case "test": 
+		case "test":
 			fmt.Printf("run _test.go files\n\n%s %s\n",
 				Bold(Color("example:", PURPLE)),
 				Italic(
@@ -324,7 +335,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("test", BLUE),
 				),
 			)
-		case "build": 
+		case "build":
 			fmt.Printf("compile packages and dependencies\n\n%s should be executed at the root of your module and will expect the entry point of your program to be main.go\n\n%s %s\n\n%s\n%s\n\n%s %s\n",
 				Bold("gopher build"),
 				Bold(Color("usage:", PURPLE)),
@@ -334,14 +345,14 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("[...ARGS]", CYAN),
 				),
 				Bold(Color("arguments:", PURPLE)),
-				PAD + "-x,--cross-platform" + "\t\t" + "build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
+				PAD+"-x,--cross-platform"+"\t\t"+"build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
 					Color("build", BLUE),
 				),
 			)
-		case "run": 
+		case "run":
 			fmt.Printf("compile and run Go program\n\n%s should be executed at the root of your module and will expect the entry point of your program to be main.go\n\n%s %s\n\n%s %s\n",
 				Bold("gopher run"),
 				Bold(Color("usage:", PURPLE)),
@@ -356,13 +367,13 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("run", BLUE),
 				),
 			)
-		case "help": 
+		case "help":
 			if len(moreCmds) > 0 {
 				help(moreCmds[0], moreCmds[1:]...)
 			} else {
 				help("")
 			}
-		case "version": 
+		case "version":
 			fmt.Printf("print Go version\n\n%s %s\n",
 				Bold(Color("example:", PURPLE)),
 				Italic(
@@ -370,7 +381,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("version", BLUE),
 				),
 			)
-		case "tidy": 
+		case "tidy":
 			fmt.Printf("add missing and remove unused modules\n\n%s %s\n",
 				Bold(Color("example:", PURPLE)),
 				Italic(
@@ -378,10 +389,11 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("tidy", BLUE),
 				),
 			)
-		default: return &CmdError {
-			Type: CmdHelp,
-			Msg: fmt.Sprintf("no such command: %s", cmd),
-		}
+		default:
+			return &CmdError{
+				Type: CmdHelp,
+				Msg:  fmt.Sprintf("no such command: %s", cmd),
+			}
 		}
 	} else {
 		fmt.Printf("A Go project manager\n\n%s %s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\nsee %s for more information about a specific command\n",
@@ -392,14 +404,14 @@ func help(cmd string, moreCmds ...string) *CmdError {
 				Color("[...ARGS]", CYAN),
 			),
 			Bold(Color("commands:", PURPLE)),
-			PAD + "add" + "\t\t" + "add dependencies to current module and install them",
-			PAD + "build" + "\t" + "compile packages and dependencies",
-			PAD + "help" + "\t" + "this",
-			PAD + "new" + "\t\t" + "create new go module",
-			PAD + "run" + "\t\t" + "compile and run Go program",
-			PAD + "test" + "\t" + "run Go test packages",
-			PAD + "tidy" + "\t" + "add missing and remove unused modules",
-			PAD + "version" + "\t" + "print Go version",
+			PAD+"add"+"\t\t"+"add dependencies to current module and install them",
+			PAD+"build"+"\t"+"compile packages and dependencies",
+			PAD+"help"+"\t"+"this",
+			PAD+"new"+"\t\t"+"create new go module",
+			PAD+"run"+"\t\t"+"compile and run Go program",
+			PAD+"test"+"\t"+"run Go test packages",
+			PAD+"tidy"+"\t"+"add missing and remove unused modules",
+			PAD+"version"+"\t"+"print Go version",
 			Italic(
 				"gopher",
 				Color("help", BLUE),
@@ -436,17 +448,19 @@ func add(pkg string) *CmdError {
 			if strings.Contains(line, "\"SearchSnippet\"") {
 				lineNums = append(lineNums, i)
 			}
-			if i == len(lines) - 1 {
+			if i == len(lines)-1 {
 				lineNums = append(lineNums, i)
 			}
 		}
 
 		for i := range lineNums {
-			if i == len(lineNums) - 1 {break}
+			if i == len(lineNums)-1 {
+				break
+			}
 			pkgHTML = append(pkgHTML, lines[lineNums[i]:lineNums[i+1]])
 		}
 
-		for i := len(pkgHTML)-1; i >= 0; i-- {
+		for i := len(pkgHTML) - 1; i >= 0; i-- {
 			var pkgName string
 			var pkgMeta string
 			var pkgDesc string
@@ -455,9 +469,12 @@ func add(pkg string) *CmdError {
 				if strings.Contains(pkgLine, "SearchSnippet-header-path") {
 					write := false
 					for _, ch := range pkgLine {
-						if ch == '(' && write == false { 
-							write = true; continue 
-						} else if ch == ')' && write == true { write = false }
+						if ch == '(' && write == false {
+							write = true
+							continue
+						} else if ch == ')' && write == true {
+							write = false
+						}
 						if write {
 							pkgName += string(ch)
 						}
@@ -465,9 +482,12 @@ func add(pkg string) *CmdError {
 				} else if strings.Contains(pkgLine, "published on") {
 					write := false
 					for _, ch := range pkgLine {
-						if ch == '>' && write == false { 
-							write = true; continue 
-						} else if ch == '<' && write == true { write = false }
+						if ch == '>' && write == false {
+							write = true
+							continue
+						} else if ch == '<' && write == true {
+							write = false
+						}
 						if write {
 							pkgMeta += string(ch)
 						}
@@ -479,7 +499,7 @@ func add(pkg string) *CmdError {
 			pkgMetaArr := strings.Split(pkgMeta, " ")
 			version := pkgMetaArr[0]
 			fmt.Printf(
-				"%s %s %s %s\n", 
+				"%s %s %s %s\n",
 				Color(strconv.Itoa(i+1), BLUE),
 				Bold(pkgName),
 				Color(version, CYAN),
@@ -493,7 +513,7 @@ func add(pkg string) *CmdError {
 					substring += string(ch)
 					if len(substring) == horizonalCharLimit {
 						substringArr := strings.Split(substring, " ")
-						fmt.Printf("%s%s\n", PAD, 
+						fmt.Printf("%s%s\n", PAD,
 							strings.Join(substringArr[:len(substringArr)-1], " "),
 						)
 						substring = substringArr[len(substringArr)-1]
@@ -518,7 +538,7 @@ func add(pkg string) *CmdError {
 		in = strings.Trim(in, " \t\n")
 		opt, err := strconv.Atoi(in)
 		if err != nil || opt >= pkgQueryLimit || opt < 1 {
-			return &CmdError {
+			return &CmdError{
 				Type: CmdAdd,
 				Msg: fmt.Sprintf("index '%s' not found\n\nenter an integer value from 1-%d",
 					in,
@@ -534,7 +554,8 @@ func add(pkg string) *CmdError {
 			output <- string(o)
 		}()
 		count := 0
-		loop: for {
+	loop:
+		for {
 			count++
 			fmt.Printf(
 				"downloading %s %s\r",
@@ -544,7 +565,7 @@ func add(pkg string) *CmdError {
 			time.Sleep(1 * time.Second)
 			select {
 			case out := <-output:
-				fmt.Printf("\n%s",out)
+				fmt.Printf("\n%s", out)
 				close(output)
 				break loop
 			default:
@@ -562,18 +583,18 @@ func version() *CmdError {
 	return nil
 }
 func tidy() *CmdError {
-	tidyCmd := exec.Command("go", "mod","tidy")
+	tidyCmd := exec.Command("go", "mod", "tidy")
 	output, err := tidyCmd.CombinedOutput()
-	if err != nil { 
-		return &CmdError {
+	if err != nil {
+		return &CmdError{
 			Type: CmdTidy,
-			Msg: strings.Split(string(output)[:len(output)-1], ": ")[1],
+			Msg:  strings.Split(string(output)[:len(output)-1], ": ")[1],
 		}
 	}
 	return nil
 }
 func test(args ...string) *CmdError {
-	args = append([]string {"test", "-v"}, args...)
+	args = append([]string{"test", "-v"}, args...)
 	runCmd := exec.Command("go", args...)
 	output, _ := runCmd.CombinedOutput()
 
@@ -589,7 +610,7 @@ func test(args ...string) *CmdError {
 				Color(functionName, BLUE),
 			)
 		} else if strings.Contains(line, "--- PASS: ") ||
-		strings.Contains(line, "--- FAIL: ") {
+			strings.Contains(line, "--- FAIL: ") {
 			lineArr := strings.Split(line, " ")
 			time := lineArr[len(lineArr)-1]
 			functionName := lineArr[2]
@@ -604,17 +625,17 @@ func test(args ...string) *CmdError {
 			}
 
 			newOutput = fmt.Sprint(
-				before, 
-				Color(functionName, BLUE), 
-				time, 
-				outcome, 
+				before,
+				Color(functionName, BLUE),
+				time,
+				outcome,
 				after,
 			)
 		} else {
 			newOutput += fmt.Sprintln(line)
 		}
 	}
-	newOutput = newOutput[:len(newOutput)-2] 
+	newOutput = newOutput[:len(newOutput)-2]
 	newOutputArr := strings.Split(newOutput, "\n")
 	lastLine := newOutputArr[len(newOutputArr)-1]
 	lastLineArr := strings.Split(lastLine, "\t")
@@ -624,20 +645,19 @@ func test(args ...string) *CmdError {
 
 	if finalOutcome == "ok" {
 		finalOutcome = Color(fmt.Sprintf(
-			"PASS(%d/%d)", passes, totalTests, 
-			), GREEN)
+			"PASS(%d/%d)", passes, totalTests,
+		), GREEN)
 		newOutput = strings.Join(newOutputArr[:len(newOutputArr)-2], "\n")
 	} else if finalOutcome == "FAIL" {
 		finalOutcome = Color(fmt.Sprintf(
-			"FAIL(%d/%d)", passes, totalTests, 
-			), RED)
+			"FAIL(%d/%d)", passes, totalTests,
+		), RED)
 		newOutput = strings.Join(newOutputArr[:len(newOutputArr)-3], "\n")
 	}
 
-
 	fmt.Println(newOutput)
 	fmt.Println("\n",
-		Bold(projectName) + "(" + totalTime + ")", 
+		Bold(projectName)+"("+totalTime+")",
 		finalOutcome,
 	)
 
@@ -651,6 +671,7 @@ PrettyPrint=true
 PrettyPrintPreviewLines=3`
 
 type Command int
+
 const (
 	CmdNew = iota
 	CmdAdd
@@ -664,28 +685,28 @@ const (
 	CmdInvalid
 )
 
-var commandName = map[Command]string {
-	CmdNew: "new",
-	CmdAdd: "add",
-	CmdHelp: "help",
-	CmdTidy: "tidy",
-	CmdBuild: "build",
-	CmdConfig: "config",
-	CmdRun: "run",
-	CmdTest: "test",
+var commandName = map[Command]string{
+	CmdNew:     "new",
+	CmdAdd:     "add",
+	CmdHelp:    "help",
+	CmdTidy:    "tidy",
+	CmdBuild:   "build",
+	CmdConfig:  "config",
+	CmdRun:     "run",
+	CmdTest:    "test",
 	CmdVersion: "version",
 	CmdInvalid: "invalid",
 }
+
 func (c Command) String() string {
 	return commandName[c]
 }
 
 type CmdError struct {
 	Type Command
-	Msg string
+	Msg  string
 }
 
 func (c CmdError) Error() string {
 	return c.Msg
 }
-

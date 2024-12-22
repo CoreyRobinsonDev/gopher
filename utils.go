@@ -63,13 +63,14 @@ func CreatePreferencesFile() {
 	f := Unwrap(os.Create(prefFile))
 	defer f.Close()
 	f.WriteString(DEFAULT_PREFERENCES)
-	fmt.Printf("%s %s", 
+	fmt.Printf("%s %s",
 		Color(Bold("Preferences"), GRAY),
 		Color("file created at ~/.config/gopher\n", GRAY),
 	)
 }
 
 type Preference int
+
 const (
 	PrefPkgQueryLimit = iota
 	PrefOpArchPairs
@@ -77,9 +78,8 @@ const (
 	PrefPrettyPrintPreviewLines
 )
 
-var preferenceName = map[Preference]string {
-	
-}
+var preferenceName = map[Preference]string{}
+
 func (p Preference) String() string {
 	return preferenceName[p]
 }
@@ -101,15 +101,17 @@ func GetPreference[T any](name Preference) (T, error) {
 	prefMap := make(map[string]string)
 	for _, prefLine := range prefLines {
 		prefLine = strings.Trim(prefLine, " \n\t")
-		if prefLine == "" {continue}
+		if prefLine == "" {
+			continue
+		}
 		kvPair := strings.Split(prefLine, "=")
-		if len(kvPair) <= 1 { 
+		if len(kvPair) <= 1 {
 			result = 0
 			return result.(T), errors.New(
-				"no value found for key " + 
-				Bold(kvPair[0]) +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"no value found for key " +
+					Bold(kvPair[0]) +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 		kvPair[0] = strings.Trim(kvPair[0], " \n\t")
 		kvPair[1] = strings.Trim(kvPair[1], " \n\t")
@@ -121,36 +123,36 @@ func GetPreference[T any](name Preference) (T, error) {
 		result = 0
 		if prefMap["PkgQueryLimit"] == "" {
 			return result.(T), errors.New(
-				"no value found for key " + 
-				Bold("PkgQueryLimit") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"no value found for key " +
+					Bold("PkgQueryLimit") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 		r, err := strconv.Atoi(prefMap["PkgQueryLimit"])
 		result = r
 		if err != nil || result.(int) > 100 || result.(int) < 1 {
 			return result.(T), errors.New(
-				"non-numeric or integer value out side of range 1-100 found for key " + 
-				Bold("PkgQueryLimit") +
-				" in ~/.config/gopher/Preferences",
-			) 
-		} 
+				"non-numeric or integer value out side of range 1-100 found for key " +
+					Bold("PkgQueryLimit") +
+					" in ~/.config/gopher/Preferences",
+			)
+		}
 
 		return result.(T), nil
 	case PrefOpArchPairs:
 		result = [][]string{}
 		if prefMap["OpArchPairs"] == "" {
 			return result.(T), errors.New(
-				"no value found for key " + 
-				Bold("OpArchPairs") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"no value found for key " +
+					Bold("OpArchPairs") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 		oparshArr := strings.Split(prefMap["OpArchPairs"], ",")
 		for i := 1; i < len(oparshArr); i += 2 {
 			op := strings.Trim(oparshArr[i-1], " \t\n")
 			arch := strings.Trim(oparshArr[i], " \t\n")
-			result = append(result.([][]string), []string{op,arch})	
+			result = append(result.([][]string), []string{op, arch})
 		}
 
 		return result.(T), nil
@@ -158,10 +160,10 @@ func GetPreference[T any](name Preference) (T, error) {
 		result = false
 		if prefMap["PrettyPrint"] == "" {
 			return result.(T), errors.New(
-				"no value found for key " + 
-				Bold("PrettyPrint") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"no value found for key " +
+					Bold("PrettyPrint") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 		if prefMap["PrettyPrint"] == "true" {
 			result = true
@@ -170,28 +172,28 @@ func GetPreference[T any](name Preference) (T, error) {
 			return result.(T), nil
 		} else {
 			return result.(T), errors.New(
-				"non-boolean value found for key " + 
-				Bold("PrettyPrint") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"non-boolean value found for key " +
+					Bold("PrettyPrint") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 	case PrefPrettyPrintPreviewLines:
 		result = 0
 		if prefMap["PrettyPrintPreviewLines"] == "" {
 			return result.(T), errors.New(
-				"no value found for key " + 
-				Bold("PrettyPrintPreviewLines") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"no value found for key " +
+					Bold("PrettyPrintPreviewLines") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 		r, err := strconv.Atoi(prefMap["PrettyPrintPreviewLines"])
 		result = r
 		if err != nil || r < 0 {
 			return result.(T), errors.New(
-				"non-numeric or negative integer value found for key " + 
-				Bold("PrettyPrintPreviewLines") +
-				" in ~/.config/gopher/Preferences",
-			) 
+				"non-numeric or negative integer value found for key " +
+					Bold("PrettyPrintPreviewLines") +
+					" in ~/.config/gopher/Preferences",
+			)
 		}
 
 		return result.(T), nil
@@ -201,7 +203,9 @@ func GetPreference[T any](name Preference) (T, error) {
 }
 
 func Unwrap[T any](val T, err error) T {
-	if err != nil { handleErr(&CmdError {CmdInvalid, err.Error()}) }
+	if err != nil {
+		handleErr(&CmdError{CmdInvalid, err.Error()})
+	}
 
 	return val
 }
@@ -232,15 +236,18 @@ func UnwrapOrElse[T any](val T, err error) func(func() T) T {
 }
 
 func Expect(err error) {
-	if err != nil { handleErr(&CmdError {CmdInvalid, err.Error()}) }
+	if err != nil {
+		handleErr(&CmdError{CmdInvalid, err.Error()})
+	}
 }
 
 func handleErr(err *CmdError) {
-	if err == nil { return }
+	if err == nil {
+		return
+	}
 	fmt.Fprintf(os.Stderr, "%s %s\n", Bold(Color("error:", RED)), err.Msg)
 	if err.Type != CmdRun && err.Type != CmdBuild {
 		fmt.Fprintf(os.Stderr, "\nrun %s for usage\n", Italic("gopher", Color("help", BLUE)))
 	}
 	os.Exit(1)
 }
-

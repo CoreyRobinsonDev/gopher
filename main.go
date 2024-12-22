@@ -4,7 +4,6 @@ import (
 	"os"
 )
 
-
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
@@ -16,4 +15,3 @@ func main() {
 	err := RunCmd(args[0], args...)
 	handleErr(err)
 }
-
