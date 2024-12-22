@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - "*"
-  pull_request:
-    tags:
-      - "*"
 
   permissions:
     contents: write
@@ -28,7 +25,7 @@ on:
           uses: goreleaser/goreleaser-action@v6
           with:
             distriburtion: goreleaser
-            version: "~> v1"
+            version: "~> v2"
             args: release --clean
           env: 
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
