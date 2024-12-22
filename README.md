@@ -3,6 +3,7 @@
 [![Report](https://goreportcard.com/badge/github.com/CoreyRobinsonDev/gopher)](https://goreportcard.com/report/github.com/CoreyRobinsonDev/gopher)
 
 **Gopher** is a Go project management CLI tool.
+<br>
 [Usage](#Usage) <span>&nbsp;•&nbsp;</span> [Preferences](#Preferences) <span>&nbsp;•&nbsp;</span> [Install](#Install)
 
 # Usage
