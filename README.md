@@ -8,13 +8,13 @@ Gopher is a Go project management CLI tool.
 <details>
     <summary><code>gopher add</code></summary>
 
-$ gopher help add
-$ Add dependencies to current module and install them.
-$ 
-$ When a full package name isn't provided gopher add will do a search on pkg.go.dev for matching packages. The number of results returned on this search can be adjusted with gopher config.
-$ 
-$ example: gopher add rsc.io/quote
-$ example: gopher add gofiber
+    $ gopher help add
+    $ Add dependencies to current module and install them.
+    $ 
+    $ When a full package name isn't provided gopher add will do a search on pkg.go.dev for matching packages. The number of results returned on this search can be adjusted with gopher config.
+    $ 
+    $ example: gopher add rsc.io/quote
+    $ example: gopher add gofiber
 </details>
 <details>
     <summary><code>gopher build</code></summary>
