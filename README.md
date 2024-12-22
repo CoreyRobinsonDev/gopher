@@ -6,7 +6,7 @@
 <br>
 [Usage](#Usage) <span>&nbsp;•&nbsp;</span> [Preferences](#Preferences) <span>&nbsp;•&nbsp;</span> [Install](#Install)
 
-# Usage
+## Usage
 <details>
     <summary><code>gopher add</code></summary>
 
@@ -98,7 +98,7 @@
     $ example: gopher version
 </details>
 
-# Preferences
+## Preferences
 On your initial call a **Preferences** file will be created at <code>~/.config/gopher</code>. Here you can customize aspects of the CLI to your liking.
 
     # The maximum number of modules returned on a 'gopher add' call
@@ -111,7 +111,7 @@ On your initial call a **Preferences** file will be created at <code>~/.config/g
     # Only takes effect when 'PrettyPrint' is set to 'true'
     PrettyPrintPreviewLines=3
 
-# Install
+## Install
 Download pre-built binary for your system here [Release](https://github.com/CoreyRobinsonDev/gopher/releases)
 
 ### Compiling from Source
@@ -147,3 +147,6 @@ gopher
     $     version	print Go version
     $ 
     $ see gopher help [COMMAND] for more information about a specific command
+
+## License
+[Apache 2.0 License](./LICENSE)
