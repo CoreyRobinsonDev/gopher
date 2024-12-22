@@ -644,7 +644,9 @@ func test(args ...string) *CmdError {
 
 var PAD string = "    "
 var DEFAULT_PREFERENCES = `PkgQueryLimit=10
-OpArchPairs=windows,amd64,windows,arm64,linux,amd64,linux,arm64,darwin,amd64,darwin,arm64`
+OpArchPairs=windows,amd64,windows,arm64,linux,amd64,linux,arm64,darwin,amd64,darwin,arm64
+PrettyPrint=true
+PrettyPrintPreviewLines=3`
 
 type Command int
 const (
