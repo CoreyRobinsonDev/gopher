@@ -345,7 +345,7 @@ func help(cmd string, moreCmds ...string) *CmdError {
 					Color("[...ARGS]", CYAN),
 				),
 				Bold(Color("arguments:", PURPLE)),
-				PAD+"-x,--cross-platform"+"\t\t"+"build binaries for seperate operating systems and cpu architectures speficied by your gopher configuration",
+				PAD+"-x,--cross-platform"+"\t\t"+"build binaries for separate operating systems and cpu architectures speficied by your gopher configuration",
 				Bold(Color("example:", PURPLE)),
 				Italic(
 					"gopher",
