@@ -112,7 +112,7 @@ On your initial call a **Preferences** file will be created at <code>~/.config/g
     PrettyPrintPreviewLines=3
 
 ## Install
-Download pre-built binary for your system here [Release](https://github.com/CoreyRobinsonDev/gopher/releases)
+Download pre-built binary for your system here [Releases](https://github.com/CoreyRobinsonDev/gopher/releases).
 
 ### Compiling from Source
 - Clone this repository
