@@ -1,5 +1,6 @@
 # gopher
 [![Release](https://github.com/CoreyRobinsonDev/gopher/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/CoreyRobinsonDev/gopher/actions/workflows/release.yml)
+[![Report](https://goreportcard.com/badge/github.com/CoreyRobinsonDev/gopher)](https://goreportcard.com/report/github.com/CoreyRobinsonDev/gopher)
 
 **Gopher** is a Go project management CLI tool.
 <br>
