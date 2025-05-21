@@ -90,7 +90,6 @@ func new(path string) *CmdError {
 	gitCmd := exec.Command("git", "init")
 	Expect(goCmd.Run())
 	Expect(gitCmd.Run())
-	Expect(os.Mkdir("bin", 0755))
 
 	f1 := Unwrap(os.Create("./main.go"))
 	f2 := Unwrap(os.Create("./.gitignore"))
