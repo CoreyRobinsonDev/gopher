@@ -75,16 +75,14 @@ func RunCmd(cmd string, a ...string) *CmdError {
 }
 
 func new(path string) *CmdError {
-	// if !strings.Contains(path, "/") {
-	// 	return &CmdError {
-	// 		Type: "new",
-	// 		Msg: "go module requires repository location\nexample: gopher new github.com/user/mymodule",
-	// 	}
-	// }
-	// pathArr := strings.Split(path, "/")
-	// name := pathArr[len(pathArr) - 1]
+	name := ""
+	if strings.Contains(path, "/") {
+		pathArr := strings.Split(path, "/")
+		name = pathArr[len(pathArr) - 1]
+	} else {
+		name = path
+	}
 
-	name := path
 	Unwrap(fmt.Printf("%sCreated binary '%s' module\n", PAD, name))
 	Expect(os.Mkdir(name, 0755))
 	Expect(os.Chdir(name))
