@@ -573,7 +573,7 @@ func add(pkg string) *CmdError {
 
 func version() *CmdError {
 	versionCmd := exec.Command("go", "version")
-	fmt.Println("gopher version 1.0.0")
+	fmt.Println("gopher version 1.1.0")
 	fmt.Print(string(Unwrap(versionCmd.Output())))
 	return nil
 }
