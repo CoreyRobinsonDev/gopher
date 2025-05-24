@@ -78,7 +78,7 @@ func new(path string) *CmdError {
 	name := ""
 	if strings.Contains(path, "/") {
 		pathArr := strings.Split(path, "/")
-		name = pathArr[len(pathArr) - 1]
+		name = pathArr[len(pathArr)-1]
 	} else {
 		name = path
 	}
