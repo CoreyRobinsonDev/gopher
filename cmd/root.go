@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	PAD = "    "
 	version = "2.0.0"
 	rootCmd = &cobra.Command{
 		Use: "gopher",
@@ -36,6 +37,7 @@ func init() {
 
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(addCmd)
 }
 
 func initConfig() {
