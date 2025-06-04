@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"os"
 
 	"github.com/charmbracelet/log"
@@ -9,7 +10,7 @@ import (
 )
 
 var (
-	cfgFile string
+	version = "2.0.0"
 	rootCmd = &cobra.Command{
 		Use: "gopher",
 		Short: "Go module manager",
@@ -19,6 +20,11 @@ var (
 		ReportCaller: false,
 		Prefix: "gopher",
 	})
+	config = &Config{
+		PrettyPrint: true,
+		PrettyPrintPreviewLines: 3,
+		PkgQueryLimit: 10,
+	}
 )
 
 func Execute() {
@@ -39,9 +45,14 @@ func initConfig() {
 	viper.SetConfigType("json")
 	viper.SetConfigName("settings")
 	viper.AutomaticEnv()
-
-	Expect(viper.ReadInConfig())
-	viper.ConfigFileUsed()
+	err := viper.ReadInConfig()
+	if err != nil {
+		file := Unwrap(os.Create(home + "/.config/gopher/settings.json"))
+		defer file.Close()
+		configBytes := Unwrap(json.MarshalIndent(config, "", "\t"))
+		file.Write(configBytes)
+	}
+	json.Unmarshal([]byte(viper.ConfigFileUsed()), &config)
 }
 
 func Expect(err error) {
