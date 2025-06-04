@@ -17,11 +17,11 @@ var (
 		Long: fmt.Sprintf("create new go module\n\n%s %s\n",
 			lipgloss.NewStyle().Foreground(YELLOW).Bold(true).Render("example:"),
 			lipgloss.NewStyle().Italic(true).Render(
-				fmt.Sprintf("gopher %s github.com/user/mymodule",
-					lipgloss.NewStyle().Foreground(CYAN).Render("new"),
-					),
+			fmt.Sprintf("gopher %s github.com/user/mymodule",
+				lipgloss.NewStyle().Foreground(CYAN).Render("new"),
 				),
 			),
+		),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				logger.Fatal("missing module name\nrun 'gopher new -h' for usage")

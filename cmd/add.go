@@ -19,12 +19,23 @@ import (
 var (
 	addCmd = &cobra.Command{
 		Use: "add {package | github.com/user/package}",
-		Short: "print go and gopehr version",
+		Short: "add dependencies to current module and install them",
 		Long: fmt.Sprintf(
-			"Add dependencies to current module and install them.\n\nWhen a full package name isn't provided %s will do a search on pkg.go.dev for matching packages.\nThe number of results returned on this search can be adjusted with %s",
+			"Add dependencies to current module and install them.\n\nWhen a full package name isn't provided %s will do a search on pkg.go.dev for matching packages.\nThe number of results returned on this search can be adjusted with %s\n\n%s %s\n\t %s",
 			lipgloss.NewStyle().Foreground(CYAN).Render("gopher add"),
 			lipgloss.NewStyle().Foreground(CYAN).Render("gopher config"),
+			lipgloss.NewStyle().Foreground(YELLOW).Bold(true).Render("example:"),
+			lipgloss.NewStyle().Italic(true).Render(
+				fmt.Sprintf("gopher %s rsc.io/quote",
+					lipgloss.NewStyle().Foreground(CYAN).Render("add"),
+				),
 			),
+			lipgloss.NewStyle().Italic(true).Render(
+				fmt.Sprintf("gopher %s gofiber",
+					lipgloss.NewStyle().Foreground(CYAN).Render("add"),
+				),
+			),
+		),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				logger.Fatal("missing package\nrun 'gopher add -h' for usage")
