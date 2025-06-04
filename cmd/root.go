@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -26,6 +27,8 @@ var (
 		PrettyPrintPreviewLines: 3,
 		PkgQueryLimit: 10,
 	}
+	CYAN = lipgloss.Color("36")
+	YELLOW = lipgloss.Color("#ffa500")
 )
 
 func Execute() {
@@ -38,6 +41,7 @@ func init() {
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(newCmd)
 }
 
 func initConfig() {

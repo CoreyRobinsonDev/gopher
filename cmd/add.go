@@ -18,16 +18,16 @@ import (
 
 var (
 	addCmd = &cobra.Command{
-		Use: "add { package | github.com/user/package }",
+		Use: "add {package | github.com/user/package}",
 		Short: "print go and gopehr version",
 		Long: fmt.Sprintf(
 			"Add dependencies to current module and install them.\n\nWhen a full package name isn't provided %s will do a search on pkg.go.dev for matching packages.\nThe number of results returned on this search can be adjusted with %s",
-			lipgloss.NewStyle().Foreground(lipgloss.Color("36")).Render("gopher add"),
-			lipgloss.NewStyle().Foreground(lipgloss.Color("36")).Render("gopher config"),
+			lipgloss.NewStyle().Foreground(CYAN).Render("gopher add"),
+			lipgloss.NewStyle().Foreground(CYAN).Render("gopher config"),
 			),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
-				logger.Fatal(errors.New("missing package"))
+				logger.Fatal("missing package\nrun 'gopher add -h' for usage")
 			}
 			pkg := args[0]
 			if strings.Contains(pkg, "/") {
@@ -105,9 +105,9 @@ var (
 					version := pkgMetaArr[0]
 					fmt.Printf(
 						"%s %s %s %s\n",
-						lipgloss.NewStyle().Foreground(lipgloss.Color("36")).Render(strconv.Itoa(i+1)),
+						lipgloss.NewStyle().Foreground(CYAN).Render(strconv.Itoa(i+1)),
 						lipgloss.NewStyle().Bold(true).Render(pkgName),
-						lipgloss.NewStyle().Foreground(lipgloss.Color("36")).Render(version),
+						lipgloss.NewStyle().Foreground(CYAN).Render(version),
 						lipgloss.NewStyle().Bold(true).Render("("+strings.Join(pkgMetaArr[1:], " ")+")"),
 					)
 					pkgDesc = strings.ReplaceAll(pkgDesc, "&#34;", "\"")
@@ -131,9 +131,9 @@ var (
 					pkgNames = append([]string{pkgName}, pkgNames...)
 				}
 				fmt.Printf("%s Packages to install (eg: 1 2 3)\n",
-					lipgloss.NewStyle().Foreground(lipgloss.Color("#ffa500")).Render("==> "),
+					lipgloss.NewStyle().Foreground(YELLOW).Render("==> "),
 				)
-				fmt.Print(lipgloss.NewStyle().Foreground(lipgloss.Color("#ffa500")).Render("==> "))
+				fmt.Print(lipgloss.NewStyle().Foreground(YELLOW).Render("==> "))
 				reader := bufio.NewReader(os.Stdin)
 				in := Unwrap(reader.ReadString('\n'))
 				in = strings.Trim(in, " \t\n")
@@ -159,7 +159,7 @@ var (
 					fmt.Printf(
 						"downloading %s %s\r",
 						lipgloss.NewStyle().Bold(true).Render(pkgNames[opt-1]),
-						lipgloss.NewStyle().Foreground(lipgloss.Color("36")).Render("("+strconv.Itoa(count)+"s)"),
+						lipgloss.NewStyle().Foreground(CYAN).Render("("+strconv.Itoa(count)+"s)"),
 						)
 					time.Sleep(1 * time.Second)
 					select {
