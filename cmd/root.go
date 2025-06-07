@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	PAD = "    "
 	version = "2.0.0"
 	rootCmd = &cobra.Command{
 		Use: "gopher",
@@ -27,8 +26,11 @@ var (
 		PrettyPrintPreviewLines: 3,
 		PkgQueryLimit: 10,
 	}
+	PAD = "    "
 	CYAN = lipgloss.Color("36")
 	YELLOW = lipgloss.Color("#ffa500")
+	GREEN = lipgloss.Color("#00f000")
+	RED = lipgloss.Color("#ff0000")
 )
 
 func Execute() {
@@ -42,6 +44,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(testCmd)
 }
 
 func initConfig() {
