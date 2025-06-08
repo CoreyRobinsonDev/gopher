@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,7 +37,13 @@ var (
 		),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
-				logger.Fatal("missing package\nrun 'gopher add -h' for usage")
+				fmt.Fprintf(
+					os.Stderr, 
+					"%s %s\n",
+					lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+					"missing package\nrun 'gopher add -h' for usage",
+				)
+				os.Exit(1)
 			}
 			pkg := args[0]
 			if strings.Contains(pkg, "/") {
@@ -51,7 +56,7 @@ var (
 					"https://pkg.go.dev/search?limit=%d&m=package&q=%s",
 					config.PkgQueryLimit,
 					pkg,
-					)
+				)
 				res := Unwrap(http.Get(url))
 				dat := string(Unwrap(io.ReadAll(res.Body)))
 				defer res.Body.Close()
@@ -150,11 +155,16 @@ var (
 				in = strings.Trim(in, " \t\n")
 				opt, err := strconv.Atoi(in)
 				if err != nil || opt >= int(config.PkgQueryLimit) || opt < 1 {
-					logger.Fatal(errors.New(
+					fmt.Fprintf(
+						os.Stderr, 
+						"%s %s\n",
+						lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
 						fmt.Sprintf("index '%s' not found\n\nenter an integer value from 1-%d",
 							in,
 							config.PkgQueryLimit,
-							)))
+						),
+					)
+					os.Exit(1)
 				}
 
 				output := make(chan string)

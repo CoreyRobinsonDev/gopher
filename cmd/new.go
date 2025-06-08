@@ -24,7 +24,13 @@ var (
 		),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
-				logger.Fatal("missing module name\nrun 'gopher new -h' for usage")
+				fmt.Fprintf(
+					os.Stderr, 
+					"%s %s\n",
+					lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+					"missing module name\nrun 'gopher new -h' for usage",
+				)
+				os.Exit(1)
 			}
 			name := ""
 			path := args[0]

@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -16,11 +16,6 @@ var (
 		Use: "gopher",
 		Short: "Go module manager",
 	}
-	logger = log.NewWithOptions(os.Stderr, log.Options{
-		ReportTimestamp: false,
-		ReportCaller: false,
-		Prefix: "gopher",
-	})
 	config = &Config{}
 	PAD = "    "
 	BLACK = lipgloss.Color("0")
@@ -77,13 +72,23 @@ func initConfig() {
 
 func Expect(err error) {
 	if err != nil {
-		logger.Fatal(err)
+		fmt.Fprintf(
+			os.Stderr, 
+			"%s %v\n",
+			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+			err,
+		)
 	}
 }
 
 func Unwrap[T any](result T, err error) T {
 	if err != nil {
-		logger.Fatal(err)
+		fmt.Fprintf(
+			os.Stderr, 
+			"%s %v\n",
+			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+			err,
+		)
 	}
 	return result
 }
