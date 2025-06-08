@@ -23,11 +23,14 @@ var (
 	})
 	config = &Config{}
 	PAD = "    "
-	CYAN = lipgloss.Color("36")
-	YELLOW = lipgloss.Color("#ffa500")
-	GREEN = lipgloss.Color("#00f000")
-	RED = lipgloss.Color("#ff0000")
-	GRAY = lipgloss.Color("2")
+	BLACK = lipgloss.Color("0")
+	RED = lipgloss.Color("1")
+	GREEN = lipgloss.Color("2")
+	YELLOW = lipgloss.Color("3")
+	BLUE = lipgloss.Color("4")
+	PURPLE = lipgloss.Color("5")
+	CYAN = lipgloss.Color("6")
+	GRAY = lipgloss.Color("7")
 )
 
 func Execute() {
