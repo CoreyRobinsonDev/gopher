@@ -41,6 +41,7 @@ func init() {
 	rootCmd.AddCommand(testCmd)
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(buildCmd)
+	rootCmd.AddCommand(tidyCmd)
 }
 
 func initConfig() {
