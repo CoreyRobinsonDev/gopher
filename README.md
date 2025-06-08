@@ -73,21 +73,6 @@ sudo mv ./gopher /usr/local/bin
 ```bash
 gopher
 ```
-    $ A Go project manager
-    $ 
-    $ usage: gopher [COMMAND] [...ARGS]
-    $ 
-    $ commands:
-    $     add		add dependencies to current module and install them
-    $     build	compile packages and dependencies
-    $     help	this
-    $     new		create new go module
-    $     run		compile and run Go program
-    $     test	run Go test packages
-    $     tidy	add missing and remove unused modules
-    $     version	print Go version
-    $ 
-    $ see gopher help [COMMAND] for more information about a specific command
 
 ## License
 [Apache 2.0 License](./LICENSE)
