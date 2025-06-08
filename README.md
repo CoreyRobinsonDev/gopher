@@ -10,6 +10,7 @@
 <details>
     <summary><code>gopher add</code></summary>
     <img alt="add command gif" src="https://vhs.charm.sh/vhs-VxKxN5my8JTDsSu5HPijo.gif"/>
+    <img alt="add command example gif" src="https://vhs.charm.sh/vhs-6SPu40VY4S6egGciFxYl4U.gif"/>
 </details>
 <details>
     <summary><code>gopher build</code></summary>
