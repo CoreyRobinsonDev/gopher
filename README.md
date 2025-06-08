@@ -4,7 +4,7 @@
 
 **Gopher** is a Go project management CLI tool.
 <br>
-[Usage](#Usage) <span>&nbsp;•&nbsp;</span> [Preferences](#Preferences) <span>&nbsp;•&nbsp;</span> [Install](#Install)
+[Usage](#Usage) <span>&nbsp;•&nbsp;</span> [Config](#Config) <span>&nbsp;•&nbsp;</span> [Install](#Install)
 
 ## Usage
 <details>
@@ -41,10 +41,13 @@
 On your initial call a **settings.json** file will be created at <code>~/.config/gopher</code>. Here you can customize aspects of the CLI to your liking.
 Default values are as shown:
 
-```json
+```jsonc
 {
+    // enables stylized output for errors when running 'gopher run' and 'gopher build'
 	"prettyPrint": true,
+    // the number of lines around the the errored line to output when 'prettyPrint' is enabled
 	"prettyPrintPreviewLines": 3,
+    // the number of packages to query for when 'gopher add {package}' is ran
 	"pkgQueryLimit": 10
 }
 ```
