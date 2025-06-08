@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
@@ -26,9 +27,11 @@ var (
 			),
 		),
 		Run: func(cmd *cobra.Command, args []string) {
-			args = append([]string{"run", "."}, args...)
-			runCmd := exec.Command("go", args...)
-			output, e := runCmd.CombinedOutput()
+			buildCmd := exec.Command("go", "build", "-o", "gobinary")
+			output, e := buildCmd.CombinedOutput()
+			if e == nil {
+				Expect(os.Remove("./gobinary"))
+			}
 
 			if config.PrettyPrint && e != nil {
 				outputLines := strings.Split(string(output), "\n")
@@ -81,8 +84,11 @@ var (
 						}
 					}
 				}
-			} else {
+			} else if e != nil {
 				fmt.Print(string(output))
+			} else {
+				o := Unwrap(exec.LookPath("go"))
+				Expect(syscall.Exec(o, append([]string{"go","run","."}, args...), os.Environ()))
 			}
 		},
 	}

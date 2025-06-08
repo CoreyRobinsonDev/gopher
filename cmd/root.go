@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -33,7 +32,7 @@ var (
 
 func Execute() {
 	initConfig()
-	Expect(rootCmd.Execute())
+	rootCmd.Execute()
 }
 
 func init() {
