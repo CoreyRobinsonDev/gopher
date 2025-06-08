@@ -35,7 +35,7 @@ var (
 				name = path
 			}
 
-			Unwrap(fmt.Printf("%sCreated binary '%s' module\n", PAD, name))
+			Unwrap(fmt.Printf("%sCreated '%s' module\n", PAD, name))
 			Expect(os.Mkdir(name, 0755))
 			Expect(os.Chdir(name))
 			goCmd := exec.Command("go", "mod", "init", path)

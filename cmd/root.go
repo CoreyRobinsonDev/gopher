@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -21,16 +22,13 @@ var (
 		ReportCaller: false,
 		Prefix: "gopher",
 	})
-	config = &Config{
-		PrettyPrint: true,
-		PrettyPrintPreviewLines: 3,
-		PkgQueryLimit: 10,
-	}
+	config = &Config{}
 	PAD = "    "
 	CYAN = lipgloss.Color("36")
 	YELLOW = lipgloss.Color("#ffa500")
 	GREEN = lipgloss.Color("#00f000")
 	RED = lipgloss.Color("#ff0000")
+	GRAY = lipgloss.Color("2")
 )
 
 func Execute() {
@@ -45,6 +43,8 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(runCmd)
+	fmt.Println(config)
 }
 
 func initConfig() {
