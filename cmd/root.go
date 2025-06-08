@@ -32,19 +32,17 @@ var (
 )
 
 func Execute() {
+	initConfig()
 	Expect(rootCmd.Execute())
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(addCmd)
 	rootCmd.AddCommand(newCmd)
 	rootCmd.AddCommand(testCmd)
 	rootCmd.AddCommand(runCmd)
-	fmt.Println(config)
 }
 
 func initConfig() {
@@ -56,12 +54,22 @@ func initConfig() {
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
-		file := Unwrap(os.Create(home + "/.config/gopher/settings.json"))
+		var file *os.File
+		file, err := os.Create(home + "/.config/gopher/settings.json")
+		if err != nil {
+			Expect(os.Mkdir(home + "/.config/gopher", 0755))
+			file = Unwrap(os.Create(home + "/.config/gopher/settings.json"))
+		}
 		defer file.Close()
+		config = &Config{
+			PrettyPrint: true,
+			PrettyPrintPreviewLines: 3,
+			PkgQueryLimit: 10,
+		}
 		configBytes := Unwrap(json.MarshalIndent(config, "", "\t"))
 		file.Write(configBytes)
 	}
-	json.Unmarshal([]byte(viper.ConfigFileUsed()), &config)
+	json.Unmarshal(Unwrap(os.ReadFile(home + "/.config/gopher/settings.json")), &config)
 }
 
 func Expect(err error) {
