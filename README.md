@@ -14,27 +14,31 @@
 </details>
 <details>
     <summary><code>gopher build</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-4cqk1DmrECFWHnHE21kLyA.gif"/>
+    <img alt="build command gif" src="https://vhs.charm.sh/vhs-4cqk1DmrECFWHnHE21kLyA.gif"/>
+</details>
+<details>
+    <summary><code>gopher config</code></summary>
+    <img alt="config command gif" src="https://vhs.charm.sh/vhs-6hQdFU1ZSXCZEd4yNb4mlB.gif"/>
 </details>
 <details>
     <summary><code>gopher new</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-69YDFALfOTecVT1HmJjFHP.gif"/>
+    <img alt="new command gif" src="https://vhs.charm.sh/vhs-69YDFALfOTecVT1HmJjFHP.gif"/>
 </details>
 <details>
     <summary><code>gopher run</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-32VJdIqvYHoH8wMk6grmZW.gif"/>
+    <img alt="run command gif" src="https://vhs.charm.sh/vhs-32VJdIqvYHoH8wMk6grmZW.gif"/>
 </details>
 <details>
     <summary><code>gopher test</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-2tCXkm2NSVWSj6sNZ4JEC7.gif"/>
+    <img alt="test command gif" src="https://vhs.charm.sh/vhs-2tCXkm2NSVWSj6sNZ4JEC7.gif"/>
 </details>
 <details>
     <summary><code>gopher tidy</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-2NJcaxNnzj9jf9g0nZseAU.gif"/>
+    <img alt="tidy command gif" src="https://vhs.charm.sh/vhs-2NJcaxNnzj9jf9g0nZseAU.gif"/>
 </details>
 <details>
     <summary><code>gopher version</code></summary>
-    <img alt="add command gif" src="https://vhs.charm.sh/vhs-2mhDWhXegEYaUO6LWSuh2u.gif"/>
+    <img alt="version command gif" src="https://vhs.charm.sh/vhs-2mhDWhXegEYaUO6LWSuh2u.gif"/>
 </details>
 
 ## Config
