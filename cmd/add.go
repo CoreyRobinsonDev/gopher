@@ -121,10 +121,10 @@ var (
 					version := pkgMetaArr[0]
 					fmt.Printf(
 						"%s %s %s %s\n",
-						lipgloss.NewStyle().Foreground(CYAN).Render(strconv.Itoa(i+1)),
+						lipgloss.NewStyle().Foreground(PURPLE).Render(strconv.Itoa(i+1)),
 						lipgloss.NewStyle().Bold(true).Render(pkgName),
 						lipgloss.NewStyle().Foreground(CYAN).Render(version),
-						lipgloss.NewStyle().Bold(true).Render("("+strings.Join(pkgMetaArr[1:], " ")+")"),
+						lipgloss.NewStyle().Foreground(YELLOW).Bold(true).Render("("+strings.Join(pkgMetaArr[1:], " ")+")"),
 					)
 					pkgDesc = strings.ReplaceAll(pkgDesc, "&#34;", "\"")
 					pkgDesc = strings.ReplaceAll(pkgDesc, "&#39;", "'")
@@ -147,9 +147,9 @@ var (
 					pkgNames = append([]string{pkgName}, pkgNames...)
 				}
 				fmt.Printf("%s Packages to install (eg: 1 2 3)\n",
-					lipgloss.NewStyle().Foreground(YELLOW).Render("==> "),
+					lipgloss.NewStyle().Foreground(GREEN).Render("==> "),
 				)
-				fmt.Print(lipgloss.NewStyle().Foreground(YELLOW).Render("==> "))
+				fmt.Print(lipgloss.NewStyle().Foreground(GREEN).Render("==> "))
 				reader := bufio.NewReader(os.Stdin)
 				in := Unwrap(reader.ReadString('\n'))
 				in = strings.Trim(in, " \t\n")
