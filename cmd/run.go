@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	WebFlag bool
 	runCmd = &cobra.Command{
 		Use: "run",
 		Short: "compile and run Go program",
@@ -87,11 +88,20 @@ var (
 			} else if e != nil {
 				fmt.Print(string(output))
 			} else {
-				o := Unwrap(exec.LookPath("go"))
-				Expect(syscall.Exec(o, append([]string{"go","run","."}, args...), os.Environ()))
+				if WebFlag {
+					o := Unwrap(exec.LookPath("go"))
+					Expect(syscall.Exec(o, append([]string{"go","run", "github.com/hajimehoshi/wasmserve@latest","."}, args...), os.Environ()))
+				} else {
+					o := Unwrap(exec.LookPath("go"))
+					Expect(syscall.Exec(o, append([]string{"go","run","."}, args...), os.Environ()))
+				}
 			}
 		},
 	}
 )
 
-
+func init() {
+	runCmd.
+		PersistentFlags(). 
+		BoolVar(&WebFlag, "web", false, "run program in browser")	
+}

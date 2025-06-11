@@ -79,6 +79,7 @@ func Expect(err error) {
 			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
 			err,
 		)
+		os.Exit(1)
 	}
 }
 
@@ -90,6 +91,7 @@ func Unwrap[T any](result T, err error) T {
 			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
 			err,
 		)
+		os.Exit(1)
 	}
 	return result
 }
