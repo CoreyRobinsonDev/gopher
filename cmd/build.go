@@ -26,9 +26,54 @@ var (
 			),
 		),
 		Run: func(cmd *cobra.Command, args []string) {
-			buildCmd := exec.Command("go", "build")
-			output, e := buildCmd.CombinedOutput()
+			var output []byte
+			var e error
+			if WebFlag {
+				Expect(os.Setenv("GOOS", "js"))
+				Expect(os.Setenv("GOARCH", "wasm"))
+				modFile := Unwrap(os.Open("./go.mod"))
+				defer modFile.Close()
 
+				b := make([]byte, 128)
+				Unwrap(modFile.Read(b))
+				projectNameArr := strings.Split(strings.Split(string(b), "\n")[0], "/")
+				projectName := strings.Split(projectNameArr[len(projectNameArr)-1], " ")[1]
+				versionCmd := exec.Command("go", "version")
+				goMajorVersion := Unwrap(strconv.Atoi(strings.Split(string(Unwrap(versionCmd.CombinedOutput())), " ")[2][4:6]))
+				gorootCmd := exec.Command("go", "env", "GOROOT")
+				goroot := strings.Trim(string(Unwrap(gorootCmd.CombinedOutput())), "\t\n ")
+
+				if goMajorVersion > 23 {
+					cpCmd := exec.Command("cp", goroot+"/lib/wasm/wasm_exec.js", ".")
+					Unwrap(cpCmd.CombinedOutput())
+				} else {
+					cpCmd := exec.Command("cp", goroot+"/misc/wasm/wasm_exec.js", ".")
+					Unwrap(cpCmd.CombinedOutput())
+				}
+				buildCmd := exec.Command("go", "build", "-o", projectName+".wasm", ".")
+				output, e = buildCmd.CombinedOutput()
+				buildHtml := Unwrap(os.Create(projectName+".html"))
+				defer buildHtml.Close()
+				Unwrap(buildHtml.WriteString(
+					fmt.Sprintf(`<!DOCTYPE html>
+<script src="wasm_exec.js"></script>
+<script>
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("%s.wasm"), go.importObject).then(result => {
+go.run(result.instance);
+});
+</script>`, projectName),
+					))
+				mainHtml := Unwrap(os.Create("main.html"))
+				defer mainHtml.Close()
+				Unwrap(mainHtml.WriteString(
+					fmt.Sprintf(`<!DOCTYPE html>
+<iframe src="%s.html" width="640" height="480" allow="autoplay"></iframe>`, projectName),
+					))
+			} else {
+				buildCmd := exec.Command("go", "build")
+				output, e = buildCmd.CombinedOutput()
+			}
 			if config.PrettyPrint && e != nil {
 				outputLines := strings.Split(string(output), "\n")
 				for _, line := range outputLines {
@@ -86,3 +131,9 @@ var (
 		},
 	}
 )
+
+func init() {
+	buildCmd.
+		PersistentFlags(). 
+		BoolVar(&WebFlag, "web", false, "compile program to run in browser")	
+}
