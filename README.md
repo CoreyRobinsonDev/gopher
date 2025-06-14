@@ -14,7 +14,9 @@
 </details>
 <details>
     <summary><code>gopher build</code></summary>
-    <img alt="build command gif" src="https://vhs.charm.sh/vhs-4cqk1DmrECFWHnHE21kLyA.gif"/>
+    <img alt="build command gif" src="https://vhs.charm.sh/vhs-2aixw6ete7XDLklPvlXmPV.gif"/>
+    <ul>use <b>--web</b> to compile the program for the browser</ul>
+    <img alt="build web command gif" src="https://vhs.charm.sh/vhs-5de3Fl4ScIwwsCoiZOdfBr.gif"/>
 </details>
 <details>
     <summary><code>gopher config</code></summary>
@@ -26,7 +28,10 @@
 </details>
 <details>
     <summary><code>gopher run</code></summary>
-    <img alt="run command gif" src="https://vhs.charm.sh/vhs-32VJdIqvYHoH8wMk6grmZW.gif"/>
+    <img alt="run command gif" src="https://vhs.charm.sh/vhs-1OYMNjjW3D9v8TH31PXSN.gif"/>
+    <ul>use <b>--web</b> to run the program in the browser</ul>
+    <img alt="run web command gif" src="https://vhs.charm.sh/vhs-1IV5ap3mHNHZ4gL8HEqO9R.gif"/>
+
 </details>
 <details>
     <summary><code>gopher test</code></summary>
