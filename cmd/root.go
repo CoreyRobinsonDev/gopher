@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	version = "2.2.0"
+	version = "2.3.0"
 	rootCmd = &cobra.Command{
 		Use: "gopher",
 		Short: "Go module manager",

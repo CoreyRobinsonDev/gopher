@@ -15,7 +15,7 @@
 <details>
     <summary><code>gopher build</code></summary>
     - use <b>--web</b> to compile the program for the browser
-    <img alt="build command gif" src="https://vhs.charm.sh/vhs-2aixw6ete7XDLklPvlXmPV.gif"/>
+    <img alt="build command gif" src="https://vhs.charm.sh/vhs-6HaDjeb6NN2SbkCJOGR3ox.gif"/>
 </details>
 <details>
     <summary><code>gopher config</code></summary>

@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	OutputFlag string
 	buildCmd = &cobra.Command{
 		Use: "build [...args]",
 		Short: "compile packages and dependencies",
@@ -71,7 +72,7 @@ go.run(result.instance);
 <iframe src="%s.html" width="640" height="480" allow="autoplay"></iframe>`, projectName),
 					))
 			} else {
-				buildCmd := exec.Command("go", "build")
+				buildCmd := exec.Command("go", "build", "-o", OutputFlag)
 				output, e = buildCmd.CombinedOutput()
 			}
 			if config.PrettyPrint && e != nil {
@@ -133,7 +134,6 @@ go.run(result.instance);
 )
 
 func init() {
-	buildCmd.
-		PersistentFlags(). 
-		BoolVar(&WebFlag, "web", false, "compile program to run in browser")	
+	buildCmd.PersistentFlags().BoolVar(&WebFlag, "web", false, "compile program to run in browser")
+	buildCmd.PersistentFlags().StringVarP(&OutputFlag, "output", "o", ".", "output")	
 }
