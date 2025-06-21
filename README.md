@@ -28,7 +28,8 @@
 <details>
     <summary><code>gopher run</code></summary>
     - use <b>--web</b> to run the program in the browser
-    <img alt="run command gif" src="https://vhs.charm.sh/vhs-1OYMNjjW3D9v8TH31PXSN.gif"/>
+    - use <b>-w, --watch</b> to live-reload your code on change
+    <img alt="run command gif" src="https://vhs.charm.sh/vhs-1m7W9G0tDPGe81ieKXjf8l.gif"/>
 
 </details>
 <details>

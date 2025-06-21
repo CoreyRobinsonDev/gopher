@@ -9,12 +9,14 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
 
 var (
 	WebFlag bool
+	WatchFlag bool
 	runCmd = &cobra.Command{
 		Use: "run",
 		Short: "compile and run Go program",
@@ -28,6 +30,7 @@ var (
 			),
 		),
 		Run: func(cmd *cobra.Command, args []string) {
+			// build binary to own the error formatting
 			buildCmd := exec.Command("go", "build", "-o", "gobinary")
 			output, e := buildCmd.CombinedOutput()
 			if e == nil {
@@ -89,11 +92,38 @@ var (
 				fmt.Print(string(output))
 			} else {
 				if WebFlag {
-					o := Unwrap(exec.LookPath("go"))
-					Expect(syscall.Exec(o, append([]string{"go","run", "github.com/hajimehoshi/wasmserve@latest","."}, args...), os.Environ()))
+					goExe := Unwrap(exec.LookPath("go"))
+					Expect(syscall.Exec(goExe, append([]string{"go","run", "github.com/hajimehoshi/wasmserve@latest","."}, args...), os.Environ()))
+				} else if WatchFlag {
+					airExe, err := exec.LookPath("air")
+					if err != nil {
+						var shouldInstall bool
+						confirm := huh.NewConfirm(). 
+							Title(fmt.Sprintf("\033[0mLive-reloading utility %s (%s) not found. Would you like to install it? %s",
+								lipgloss.NewStyle().Foreground(CYAN).Render("air"),
+								lipgloss.NewStyle().Foreground(BLUE).Render("https://github.com/air-verse/air"),
+								lipgloss.NewStyle().Foreground(GRAY).Render("(go 1.23 or higher required)"),
+							)). 
+							Affirmative("yes"). 
+							Negative("no"). 
+							Value(&shouldInstall). 
+							WithTheme(huh.ThemeCatppuccin())
+						Expect(confirm.Run())
+
+						if shouldInstall {
+							goCmd := exec.Command("go", "install", "github.com/air-verse/air@latest")
+							fmt.Print(string(Unwrap(goCmd.CombinedOutput())))
+							fmt.Printf("%s installed successfully in $GOBIN\n",
+								lipgloss.NewStyle().Foreground(CYAN).Render("air"),
+							)
+						}
+
+						os.Exit(0)
+					}
+					Expect(syscall.Exec(airExe, append([]string{"air"}, args...), os.Environ()))
 				} else {
-					o := Unwrap(exec.LookPath("go"))
-					Expect(syscall.Exec(o, append([]string{"go","run","."}, args...), os.Environ()))
+					goExe := Unwrap(exec.LookPath("go"))
+					Expect(syscall.Exec(goExe, append([]string{"go","run","."}, args...), os.Environ()))
 				}
 			}
 		},
@@ -101,7 +131,6 @@ var (
 )
 
 func init() {
-	runCmd.
-		PersistentFlags(). 
-		BoolVar(&WebFlag, "web", false, "run program in browser")	
+	runCmd.PersistentFlags().BoolVar(&WebFlag, "web", false, "run program in browser")	
+	runCmd.PersistentFlags().BoolVarP(&WatchFlag, "watch", "w", false, "live-reload your code on change")	
 }
