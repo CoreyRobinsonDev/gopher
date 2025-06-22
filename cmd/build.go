@@ -72,6 +72,9 @@ go.run(result.instance);
 <iframe src="%s.html" width="640" height="480" allow="autoplay"></iframe>`, projectName),
 					))
 			} else {
+				// NOTE: errors when running 'gopher build' to the location of the gopher 
+				// binary since 'go build' fails to copy over the running binary.
+				// only occurs when building gopher with gopher
 				buildCmd := exec.Command("go", "build", "-o", OutputFlag)
 				output, e = buildCmd.CombinedOutput()
 			}
@@ -135,5 +138,5 @@ go.run(result.instance);
 
 func init() {
 	buildCmd.PersistentFlags().BoolVar(&WebFlag, "web", false, "compile program to run in browser")
-	buildCmd.PersistentFlags().StringVarP(&OutputFlag, "output", "o", ".", "output")	
+	buildCmd.PersistentFlags().StringVarP(&OutputFlag, "output", "o", ".", "output directory")	
 }

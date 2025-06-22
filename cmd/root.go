@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
@@ -72,26 +73,54 @@ func initConfig() {
 }
 
 func Expect(err error) {
-	if err != nil {
-		fmt.Fprintf(
-			os.Stderr, 
-			"%s %v\n",
-			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
-			err,
-		)
-		os.Exit(1)
+	_, file, line, ok := runtime.Caller(1)
+	if !ok { 
+		if err != nil {
+			fmt.Fprintf(
+				os.Stderr, 
+				"%s %v\n",
+				lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+				err,
+			)
+			os.Exit(1)
+		}
+	} else {
+		if err != nil {
+			fmt.Fprintf(
+				os.Stderr, 
+				"%s %v\n",
+				lipgloss.NewStyle().Foreground(GRAY).Render(
+					fmt.Sprintf("gopher(%s:%d): ",file,line)),
+				err,
+			)
+			os.Exit(1)
+		}
 	}
 }
 
 func Unwrap[T any](result T, err error) T {
-	if err != nil {
-		fmt.Fprintf(
-			os.Stderr, 
-			"%s %v\n",
-			lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
-			err,
-		)
-		os.Exit(1)
+	_, file, line, ok := runtime.Caller(1)
+	if !ok {
+		if err != nil {
+			fmt.Fprintf(
+				os.Stderr, 
+				"%s %v\n",
+				lipgloss.NewStyle().Foreground(GRAY).Render("gopher:"),
+				err,
+			)
+			os.Exit(1)
+		}
+	} else {
+		if err != nil {
+			fmt.Fprintf(
+				os.Stderr, 
+				"%s %v\n",
+				lipgloss.NewStyle().Foreground(GRAY).Render(
+					fmt.Sprintf("gopher(%s:%d): ",file,line)),
+				err,
+			)
+			os.Exit(1)
+		}
 	}
 	return result
 }
