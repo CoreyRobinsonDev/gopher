@@ -26,6 +26,11 @@
     <img alt="new command gif" src="https://vhs.charm.sh/vhs-69YDFALfOTecVT1HmJjFHP.gif"/>
 </details>
 <details>
+    <summary><code>gopher release</code></summary>
+    - use <b>-c, --clean</b> to remove the 'dist' directory before build <br>
+    <img alt="release command gif" src="https://vhs.charm.sh/vhs-15PT4fvtcigaoZzq8YNFM0.gif"/>
+</details>
+<details>
     <summary><code>gopher run</code></summary>
     - use <b>--web</b> to run the program in the browser <br>
     - use <b>-w, --watch</b> to live-reload your code on change <br>

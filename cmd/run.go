@@ -30,7 +30,7 @@ var (
 			),
 		),
 		Run: func(cmd *cobra.Command, args []string) {
-			// build binary to own the error formatting
+			// build binary first to own the error formatting
 			buildCmd := exec.Command("go", "build", "-o", "gobinary")
 			output, e := buildCmd.CombinedOutput()
 			if e == nil {

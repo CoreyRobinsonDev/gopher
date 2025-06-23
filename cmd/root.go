@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	version = "2.4.0"
+	version = "2.5.0"
 	rootCmd = &cobra.Command{
 		Use: "gopher",
 		Short: "Go module manager",
@@ -43,6 +43,7 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(buildCmd)
 	rootCmd.AddCommand(tidyCmd)
+	rootCmd.AddCommand(releaseCmd)
 }
 
 func initConfig() {
